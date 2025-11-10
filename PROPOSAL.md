@@ -28,9 +28,16 @@ From there:
 
         •	Naïve baseline: mean or median outcome by stage (average funding or success rate)
         •	Statistical model: logistic or linear regression predicting the likelihood of “success” (reaching a later stage or being acquired)
+        For ML modeling, "success" will be defined as:
+            1. Primary: Reaching Series B+ funding (binary classification)
+            2. Secondary: Total funding raised > $10M (regression)
+            3. Tertiary: Exit via acquisition or IPO (if data available)
         •	ML models: random forest and gradient boosting to capture nonlinear relationships
         
-Results will be compared using standards metrics (AUC, accuracy,MAE) and feature importance plots will help identify the strongest predictors. The final Venture-scope “score” will combine rule-based KPIs and data driven model insights. 
+        Results will be compared using standards metrics (AUC, accuracy,MAE) and feature importance plots will help identify the strongest predictors. The final Venture-scope “score” will combine rule-based KPIs and data driven model insights as follow :
+        - 40% Rule-based KPIs (Rule of 40, Burn Multiple, etc.)
+        - 40% ML prediction probability (ensemble of models)
+        - 20% Traction Index (investor count, growth signals)
  
     4.	Visualization & output: risk–return scatterplots, ranking tables that shows which startup look safer or more promising and sector heatmaps.
  
