@@ -112,6 +112,51 @@ def estimate_burn_rate(
     
     return monthly_burn
 
+def calculate_burn_multiple(
+    df: pd.DataFrame,
+    burn_col: str = 'monthly_burn',
+    revenue_col: str = 'estimated_revenue'
+) -> pd.Series:
+    """
+    Calculate Burn Multiple = Annual Burn Rate / Annual Revenue
+    
+    Lower is better:
+    - <1.0: Excellent (spend <$1 to generate $1 revenue)
+    - 1.0-1.5: Good (acceptable for growth stage)
+    - 1.5-3.0: Moderate (burning capital quickly)
+    - >3.0: Concerning (unsustainable burn)
+    
+    Args:
+        df: DataFrame with burn rate and revenue
+        burn_col: Column name for monthly burn
+        revenue_col: Column name for annual revenue
+    
+    Returns:
+        Burn multiple ratio
+    """
+    # Get monthly burn (already calculated)
+    if burn_col not in df.columns:
+        monthly_burn = estimate_burn_rate(df)
+    else:
+        monthly_burn = df[burn_col]
+    
+    # Annual burn = Monthly × 12
+    annual_burn = monthly_burn * 12
+    
+    # Get annual revenue (already calculated)
+    if revenue_col not in df.columns:
+        annual_revenue = estimate_revenue(df)
+    else:
+        annual_revenue = df[revenue_col]
+    
+    # Calculate Burn Multiple
+    burn_multiple = annual_burn / annual_revenue.replace(0, np.nan)
+    
+    # Clip extreme outliers (cap at 10x)
+    burn_multiple = burn_multiple.clip(upper=10.0)
+    
+    return burn_multiple
+
 
 def calculate_runway(
     df: pd.DataFrame,
@@ -242,6 +287,11 @@ def calculate_all_kpis(
         print("  ├─ Estimating burn rate and runway...")
     result['monthly_burn'] = estimate_burn_rate(result)
     result['runway_months'] = calculate_runway(result)
+
+    if verbose:
+        print("  ├─ Calculating burn multiple...")
+    result['burn_multiple'] = calculate_burn_multiple(result)
+
     
     if verbose:
         print("  └─ Calculating traction index...")
@@ -253,7 +303,7 @@ def calculate_all_kpis(
     
     if verbose:
         print("\n✅ KPI calculation complete!")
-        print(f"   Added columns: estimated_revenue, capital_efficiency, monthly_burn, runway_months, traction_index")
+        print(f"   Added columns: estimated_revenue, capital_efficiency, monthly_burn, runway_months, burn_multiple, traction_index, rule_of_40")
     
     return result
 
@@ -262,6 +312,7 @@ def kpi_summary(df: pd.DataFrame) -> None:
     """Print summary statistics for calculated KPIs."""
     kpi_cols = [
         'capital_efficiency', 'monthly_burn', 'runway_months', 
+        'burn_multiple',
         'traction_index', 'estimated_revenue', 'rule_of_40'
     ]
     
