@@ -1,8 +1,30 @@
 # API Documentation
 
-## Interactive Predictor
+## Installation
+```bash
+pip install -e .
+```
 
-### Usage
+## Core Functions
+
+### load_startups()
+```python
+from venture_scope.ingest.loaders import load_startups
+df = load_startups(filter_funded=True)
+```
+**Parameters:**
+- `filter_funded` (bool): Keep only funded companies
+
+**Returns:**
+- DataFrame with 7 columns
+
+**Example:**
+```python
+df = load_startups()
+print(df.head())
+```
+
+### predict_startup()
 ```python
 from venture_scope.ml.predict import predict_startup
 
@@ -10,39 +32,34 @@ result = predict_startup(
     funding_amount=15_000_000,
     stage='Series A',
     sector='software',
-    country='USA',
-    investors_count=8,
-    founded_year=2020
+    country='USA'
 )
-
-print(f"Success Probability: {result['success_probability']:.1%}")
-print(f"Investment Score: {result['investment_score']:.1f}/100")
 ```
 
-### Command Line
+**Returns:**
+```python
+{
+    'success_probability': 0.78,
+    'investment_score': 67.2,
+    'feature_contributions': {...}
+}
+```
+
+## Models
+
+### RandomForestModel
+- Path: `results/models/random_forest.pkl`
+- Features: 116
+- Performance: 76% accuracy, 90% recall
+
+## CLI Tools
+
+### Interactive Prediction
 ```bash
 python src/venture_scope/ml/predict.py
 ```
 
-Follow interactive prompts to get predictions.
-
-## Model Comparison
+### Model Comparison
 ```bash
 python src/venture_scope/ml/model_comparison.py
 ```
-
-Runs formal comparison of 4 ML algorithms.
-
-## Analysis Scripts
-
-### Missing Data Analysis
-```bash
-python examples/missing_data_analysis.py
-```
-
-### Visualizations
-```bash
-python examples/create_visualizations.py
-```
-
-Generates 5 professional figures in `results/figures/`.

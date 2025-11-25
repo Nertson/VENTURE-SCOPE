@@ -1304,6 +1304,20 @@ To improve data quality and reduce bias:
 
 ### Data Sources
 
+## ⚠️ Note on Data Files
+
+Large CSV files (> 100MB) are not included in this repository due to GitHub size limits.
+
+**To reproduce the analysis:**
+1. Download Crunchbase 2013 dataset
+2. Place CSV files in `data/raw/`
+3. Run: `python src/venture_scope/ml/model.py`
+
+**Small result files available:**
+- Model comparison results: `results/model_comparison.csv`
+- Top 100 startups: `results/top_100_startups.csv`
+- Visualizations: `results/figures/*.png`
+
 **Crunchbase**:
 - Crunchbase (2013). "Crunchbase Dataset Snapshot - Startup Investments." *Kaggle*.  
   URL: https://www.kaggle.com/datasets/justinas/startup-investments
