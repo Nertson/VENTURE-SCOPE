@@ -7,6 +7,7 @@ This module computes standard VC metrics used to evaluate startup performance:
 - Capital Efficiency: Revenue / Total Funding
 - Burn Rate & Runway: Cash management metrics
 - Traction Index: Composite growth indicator
+- Rule of 40: Revenue Growthr + Profit Margin
 """
 
 import pandas as pd

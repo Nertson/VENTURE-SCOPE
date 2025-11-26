@@ -308,7 +308,7 @@ def display_comparison(df_results):
 
 def save_results(df_results):
     """Save comparison results to CSV."""
-    output_dir = Path("outputs")
+    output_dir = Path("results")
     output_dir.mkdir(exist_ok=True)
     
     output_path = output_dir / "model_comparison.csv"

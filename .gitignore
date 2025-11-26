@@ -5,3 +5,9 @@ __pycache__/
 *.zip
 data/**/*.csv
 results/**/*.csv
+# Dossier d'archivage (outputs precedent)
+_outputs_archived/
+
+# Le dossier de resultats qui est actif
+results/
+

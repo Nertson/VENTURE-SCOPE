@@ -19,7 +19,7 @@ We apply the following filters to ensure data quality:
 
 **Limitation**: This introduces selection bias by excluding bootstrapped successes.
 
-For detailed methodology, see [METHODOLOGY.md](METHODOLOGY.md).
+For detailed methodology, see the Methodology section line 60
 
 ## 📁 Project Structure
 ```
@@ -27,13 +27,36 @@ VENTURE-SCOPE/
 ├── data/
 │   ├── raw/                    # Original Crunchbase CSVs
 │   └── processed/              # Cleaned and filtered data
+├── docs/
+│   └── API.md  
+├── exemples/
+│   └── create_visualizations.py 
+│   └── missing_data_analysis.py
+│   └── README.md  
+├── results/
+│   └── figures/
+│   └── models/
+│   └── missing_data_analysis.csv
+│   └── API.md  model_comparison.csv
+│   └── top_100_startups.csv
 ├── src/
 │   └── venture_scope/
 │       ├── ingest/             # Data loading (loaders.py)
-│       └── data/               # Data cleaning (cleaners.py)
+│           └──loaders_enriched.py
+│           └──loaders.py
+│       └── ml/  
+│           └──model_comparison.py
+│           └──model.py
+│           └──predict.py  
+│       └── features 
+│           └──kpi.py    
+│           └──scoring.py     
+│       └── __init__.py  
 ├── tests/                      # Unit tests
+│   └── test_model.py
 ├── README.md                   # This file
 ├── METHODOLOGY.md              # Technical decisions
+├── PROPOSAL.md
 └── requirements.txt
 ```
 

@@ -210,7 +210,7 @@ Key Findings:
 2. SYSTEMATIC BIAS BY STAGE
    ⚠️  Early-stage companies (Seed, Angel) report less
    ⚠️  Later-stage companies (Series B+) have better reporting
-   → Confirms professor's hypothesis: small firms record less
+   → Confirms hypothesis: small firms record less
 
 3. SECTOR VARIATIONS
    ⚠️  Some sectors (hardware, cleantech) have higher missing rates
@@ -232,7 +232,7 @@ Key Findings:
 
 def save_results(results):
     """Save analysis results."""
-    output_dir = Path("outputs")
+    output_dir = Path("results")
     output_dir.mkdir(exist_ok=True)
     
     # Save summary stats

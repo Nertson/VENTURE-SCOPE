@@ -19,7 +19,7 @@ print("📊 VENTURE-SCOPE: Visualization Generator")
 print("=" * 70)
 
 # Create output directory
-output_dir = Path("outputs/figures")
+output_dir = Path("results/figures")
 output_dir.mkdir(parents=True, exist_ok=True)
 
 
@@ -250,7 +250,7 @@ def create_missing_data_comparison():
     plt.close()
 
 
-# ==================== 5. BONUS: ROC CURVES ====================
+# ==================== 5. ROC CURVES ====================
 
 def create_roc_curves():
     """ROC curves for model comparison."""
