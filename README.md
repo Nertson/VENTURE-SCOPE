@@ -19,7 +19,7 @@ We apply the following filters to ensure data quality:
 
 **Limitation**: This introduces selection bias by excluding bootstrapped successes.
 
-For detailed methodology, see the Methodology section line 60
+For detailed methodology, see the Methodology section line 83
 
 ## 📁 Project Structure
 ```
@@ -78,7 +78,7 @@ python scripts/analyze_missing.py
 ```
 
 This script analyzes missing data patterns for `investors_count` and provides insights by stage, country, and funding amount.
-```
+
 
 ## 📊 Methodology
 
@@ -88,7 +88,7 @@ This script analyzes missing data patterns for `investors_count` and provides in
 
 ---
 
-## 1. Data Sources
+##1. Data Sources
 
 **Dataset**: Crunchbase 2013 Snapshot  
 **Source**: [Kaggle - justinas/startup-investments](https://www.kaggle.com/datasets/justinas/startup-investments)
