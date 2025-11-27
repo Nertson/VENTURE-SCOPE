@@ -189,7 +189,6 @@ This script analyzes missing data patterns for `investors_count` and provides in
 4. **Quality over quantity**: Clean, complete data beats larger noisy dataset
 5. **Enables robust cross-validation**: 80/20 train-test split → 22,299 train, 5,575 test
 
----
 
 ---
 
@@ -440,11 +439,11 @@ The use of proxies and estimation when facing data limitations is an established
 - Pacific Crest SaaS Survey (2013-2019)
 - David Skok "SaaS Metrics 2.0" framework
 
-#### Our Estimation Approach: Two-Step Method
+#### My Estimation Approach: Two-Step Method
 
 **Step 1: Stage-Based Benchmarks**
 
-We apply typical growth/margin profiles by stage based on industry data:
+I apply typical growth/margin profiles by stage based on industry data:
 
 | Stage     | Typical Growth | Typical Margin | Rule of 40 | Source               |
 |-----------|----------------|----------------|------------|----------------------|
@@ -548,7 +547,7 @@ Final = Clip(Estimated Rule of 40, min=0, max=150)
 - 1.5-3.0: Moderate (burning capital quickly)
 - >3.0: Concerning (unsustainable burn)
 
-**Our Calculation**:
+**My Calculation**:
 ```python
 Annual Burn = Monthly Burn × 12
 Annual Revenue = Estimated Revenue (from section 4.5)
@@ -557,7 +556,7 @@ Burn Multiple = Annual Burn / Annual Revenue
 
 **Challenge**: Like revenue, actual burn rate is not disclosed publicly
 
-**Our Approach**: 
+**My Approach**: 
 - Monthly Burn estimated from: `Total Funding / Stage-Specific Burn Period`
 - Burn periods: Seed (18 months), Series A (24 months), Series B (30 months), Series C+ (36 months)
 
@@ -675,7 +674,7 @@ In venture capital, the cost structure is asymmetric:
 - **Missing a unicorn (false negative)** = Lost 100x-1000x return
 - **Investing in a failure (false positive)** = Lost 1x investment
 
-**Our model's 90.1% recall means**:
+**My model's 90.1% recall means**:
 - Captures 90% of successful startups (506 of 563)
 - Misses only 10% (57 companies)
 - This is optimal for VC where missing winners is costlier than backing losers
@@ -736,12 +735,12 @@ This formal comparison follows established best practices in machine learning mo
 - **James et al. (2013)**: "An Introduction to Statistical Learning" - emphasizes cross-validation and multiple metric evaluation
 - **Breiman (2001)**: "Random Forests" - demonstrates robustness to overfitting and noise
 
-**Our methodology is rigorous**:
-✅ Multiple models compared (not arbitrary selection)
-✅ Proper train/test split (no data leakage)
-✅ Cross-validation (tests generalization)
-✅ Business-context metrics (recall prioritized in VC)
-✅ Statistical stability assessed (CV variance)
+**My methodology is rigorous**:
+- ✅ Multiple models compared (not arbitrary selection)
+- ✅ Proper train/test split (no data leakage)
+- ✅ Cross-validation (tests generalization)
+- ✅ Business-context metrics (recall prioritized in VC)
+- ✅ Statistical stability assessed (CV variance)
 ---
 
 ### 5.5 Selected Model: Random Forest Classifier
@@ -890,7 +889,7 @@ Improvement over baseline is substantial (76.0% vs 61.7%) and statistically sign
   - Demonstrates validated product-market fit
   - Less dependent on continuous funding rounds
 
-**3. Investment Score Validates Our Approach (10.9%)**
+**3. Investment Score Validates My Approach (10.9%)**
 - **Insight**: Our custom weighted scoring is 3rd most predictive! 🎉
 - **Validation**: Proves our KPI combination methodology captures real success signals
 - **Academic Value**: Shows thoughtful feature engineering beats raw metrics
@@ -1165,11 +1164,6 @@ evaluate(predictions_2020, outcomes_2023)
 
 **Academic Standard**: Master-level work demonstrating technical competence AND domain knowledge.
 
-**What Professors Evaluate**:
-- Can implement ML pipeline? **YES** ✅
-- Understand limitations? **YES** (this section proves it) ✅
-- Propose improvements? **YES** (section 6.4) ✅
-- Think critically? **YES** (identified look-ahead bias) ✅
 
 ---
 
@@ -1178,11 +1172,11 @@ evaluate(predictions_2020, outcomes_2023)
 **Q1: "Model predicts outcomes already known. How is this useful?"**
 
 **A1**:
-1. **Learning Objective**: Demonstrates ML methodology ✅
-2. **Pattern Discovery**: Identifies success factors (funding > efficiency) ✅
-3. **Proof of Concept**: Validates technical feasibility (76% accuracy) ✅
-4. **Relative Ranking**: Successfully orders startups by likelihood ✅
-5. **Academic Rigor**: Documenting limitations shows maturity ✅
+1. **Learning Objective**: Demonstrates ML methodology 
+2. **Pattern Discovery**: Identifies success factors (funding > efficiency) 
+3. **Proof of Concept**: Validates technical feasibility (76% accuracy) 
+4. **Relative Ranking**: Successfully orders startups by likelihood 
+5. **Academic Rigor**: Documenting limitations shows maturity 
 
 **Academic Precedent**: Many ML papers use historical data before production deployment (fraud detection, credit scoring).
 
@@ -1348,6 +1342,6 @@ Large CSV files (> 100MB) are not included in this repository due to GitHub size
 
 ---
 
-*Last Updated: 14.11.2025*  
+*Last Updated: 26.11.2025*  
 *Author: Arthur Pillet*  
 *Université de Lausanne - HEC Lausanne*
