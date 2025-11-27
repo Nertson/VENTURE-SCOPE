@@ -34,6 +34,12 @@
 7. **Proposal**
    - I knew what kind of project i wanted to do but i checked with AI to be sure that my idea was feasable, that it would match the criterias and that i will find enough data online
 
+8. **README.md**
+   - I used AI to keep track of what i was doing (bullet points) so when it came to writting my methodology i gained a lot of time
+   - When I made some assumptions, I asked AI if what I was doing has been done before and i asked sources so i could check by myself
+   - I used AI to generate questions that could be in someone else's mind after seeing my project so i coul already prepare the answers 
+   - I used AI to check my spelling, and make sure that the documentation was clear, readable by everyone 
+
 
 
 ## Learning Moments
