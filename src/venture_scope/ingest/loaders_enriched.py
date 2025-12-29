@@ -58,7 +58,7 @@ def load_enriched_startups(
     data_dir = Path(data_dir)
     
     if verbose:
-        print("📂 Loading enriched Crunchbase data...\n")
+        print(" Loading enriched Crunchbase data...\n")
     
     # ==================== LOAD OBJECTS (COMPANIES) ====================
     
@@ -185,7 +185,7 @@ def load_enriched_startups(
         
         if verbose:
             threshold_text = f"${min_funding:,.0f}" if min_funding > 0 else "$0"
-            print(f"\n🔍 Filtered: Kept {len(result):,} companies with funding > {threshold_text}")
+            print(f"\nFiltered: Kept {len(result):,} companies with funding > {threshold_text}")
             print(f"   Removed: {before - len(result):,} companies")
     
     # ==================== REPORT ====================
@@ -199,7 +199,7 @@ def load_enriched_startups(
 
 def _data_quality_report(df: pd.DataFrame) -> None:
     """Print data quality summary."""
-    print("\n📊 Data Quality Report:")
+    print("\n Data Quality Report:")
     print("=" * 60)
     
     for col in ['company', 'stage', 'country', 'sector', 'funding_amount', 'investors_count', 'founded_year']:
@@ -239,16 +239,16 @@ if __name__ == "__main__":
         min_funding=0  # Keep all with funding > 0
     )
     
-    print(f"\n✅ Successfully loaded {len(df):,} companies!")
-    print(f"\n📋 Sample (first 10 rows):\n")
+    print(f"\n Successfully loaded {len(df):,} companies!")
+    print(f"\n Sample (first 10 rows):\n")
     print(df[['company', 'stage', 'country', 'sector', 'funding_amount', 'investors_count']].head(10).to_string())
     
     # Stage distribution
-    print(f"\n📊 Stage Distribution:\n")
+    print(f"\n Stage Distribution:\n")
     print(df['stage'].value_counts().head(10))
     
     # Save to processed
     output_path = Path("data/processed/startups_enriched.csv")
     output_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(output_path, index=False)
-    print(f"\n💾 Saved to: {output_path}")
+    print(f"\n Saved to: {output_path}")

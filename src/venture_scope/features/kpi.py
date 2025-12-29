@@ -272,7 +272,7 @@ def calculate_all_kpis(
     Calculate all KPIs for a startup dataset.
     """
     if verbose:
-        print("📊 Calculating Venture Capital KPIs...")
+        print("Calculating Venture Capital KPIs...")
     
     result = df.copy()
     
@@ -303,7 +303,7 @@ def calculate_all_kpis(
     result['rule_of_40'] = estimate_rule_of_40(result)
     
     if verbose:
-        print("\n✅ KPI calculation complete!")
+        print("\nKPI calculation complete!")
         print(f"   Added columns: estimated_revenue, capital_efficiency, monthly_burn, runway_months, burn_multiple, traction_index, rule_of_40")
     
     return result
@@ -319,7 +319,7 @@ def kpi_summary(df: pd.DataFrame) -> None:
     
     available_kpis = [col for col in kpi_cols if col in df.columns]
     
-    print("\n📊 KPI Summary Statistics:")
+    print("\nKPI Summary Statistics:")
     print("=" * 80)
     
     for kpi in available_kpis:
@@ -343,17 +343,17 @@ if __name__ == "__main__":
     input_file = Path("data/processed/startups_enriched.csv")
     
     if not input_file.exists():
-        print(f"❌ File not found: {input_file}")
+        print(f" File not found: {input_file}")
         print("   Run the enriched loader first!")
         sys.exit(1)
     
-    print(f"📂 Loading data from: {input_file}")
+    print(f"Loading data from: {input_file}")
     df = pd.read_csv(input_file)
-    print(f"✅ Loaded {len(df):,} companies\n")
+    print(f"Loaded {len(df):,} companies\n")
     
     df_with_kpis = calculate_all_kpis(df, verbose=True)
     
-    print("\n📋 Sample (first 10 rows):")
+    print("\nSample (first 10 rows):")
     print(df_with_kpis[[
         'company', 'stage', 'funding_amount', 'investors_count',
         'capital_efficiency', 'runway_months', 'traction_index'
@@ -363,4 +363,4 @@ if __name__ == "__main__":
     
     output_file = Path("data/processed/startups_with_kpis.csv")
     df_with_kpis.to_csv(output_file, index=False)
-    print(f"\n💾 Saved to: {output_file}")
+    print(f"\nSaved to: {output_file}")

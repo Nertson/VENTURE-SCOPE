@@ -15,7 +15,7 @@ plt.style.use('seaborn-v0_8-darkgrid')
 sns.set_palette("husl")
 
 print("=" * 70)
-print("📊 VENTURE-SCOPE: Visualization Generator")
+print(" VENTURE-SCOPE: Visualization Generator")
 print("=" * 70)
 
 # Create output directory
@@ -28,7 +28,7 @@ output_dir.mkdir(parents=True, exist_ok=True)
 def create_model_comparison():
     """Bar chart comparing 4 ML models."""
     
-    print("\n📊 Creating Model Comparison Chart...")
+    print("\n Creating Model Comparison Chart...")
     
     models = ['Random Forest', 'Gradient Boosting', 'Logistic Regression', 'SVM']
     
@@ -76,7 +76,7 @@ def create_model_comparison():
     
     output_path = output_dir / "model_comparison.png"
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    print(f"   ✅ Saved: {output_path}")
+    print(f"    Saved: {output_path}")
     plt.close()
 
 
@@ -85,7 +85,7 @@ def create_model_comparison():
 def create_confusion_matrix():
     """Heatmap of confusion matrix for Random Forest."""
     
-    print("\n📊 Creating Confusion Matrix...")
+    print("\n Creating Confusion Matrix...")
     
     # Confusion matrix data
     cm = np.array([
@@ -122,7 +122,7 @@ def create_confusion_matrix():
     
     output_path = output_dir / "confusion_matrix.png"
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    print(f"   ✅ Saved: {output_path}")
+    print(f"    Saved: {output_path}")
     plt.close()
 
 
@@ -131,7 +131,7 @@ def create_confusion_matrix():
 def create_feature_importance():
     """Bar chart of top 10 feature importances."""
     
-    print("\n📊 Creating Feature Importance Chart...")
+    print("\n Creating Feature Importance Chart...")
     
     features = [
         'funding_amount', 'capital_efficiency', 'investment_score',
@@ -168,7 +168,7 @@ def create_feature_importance():
     
     output_path = output_dir / "feature_importance.png"
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    print(f"   ✅ Saved: {output_path}")
+    print(f"    Saved: {output_path}")
     plt.close()
 
 
@@ -177,7 +177,7 @@ def create_feature_importance():
 def create_missing_data_comparison():
     """Box plot comparing funding for missing vs present investor data."""
     
-    print("\n📊 Creating Missing Data Analysis Chart...")
+    print("\n Creating Missing Data Analysis Chart...")
     
     # Create figure with two subplots
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
@@ -246,7 +246,7 @@ def create_missing_data_comparison():
     
     output_path = output_dir / "missing_data_analysis.png"
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    print(f"   ✅ Saved: {output_path}")
+    print(f"    Saved: {output_path}")
     plt.close()
 
 
@@ -255,7 +255,7 @@ def create_missing_data_comparison():
 def create_roc_curves():
     """ROC curves for model comparison."""
     
-    print("\n📊 Creating ROC Curves...")
+    print("\n Creating ROC Curves...")
     
     fig, ax = plt.subplots(figsize=(9, 8))
     
@@ -298,7 +298,7 @@ def create_roc_curves():
     
     output_path = output_dir / "roc_curves.png"
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    print(f"   ✅ Saved: {output_path}")
+    print(f"    Saved: {output_path}")
     plt.close()
 
 
@@ -307,7 +307,7 @@ def create_roc_curves():
 def main():
     """Generate all visualizations."""
     
-    print("\n🎨 Generating visualizations...\n")
+    print("\n Generating visualizations...\n")
     
     # Create all charts
     create_model_comparison()
@@ -317,9 +317,9 @@ def main():
     create_roc_curves()
     
     print("\n" + "=" * 70)
-    print("✅ All visualizations created successfully!")
+    print(" All visualizations created successfully!")
     print("=" * 70)
-    print(f"\n📁 Location: {output_dir}/")
+    print(f"\n Location: {output_dir}/")
     print("\nGenerated files:")
     print("  1. model_comparison.png")
     print("  2. confusion_matrix.png")

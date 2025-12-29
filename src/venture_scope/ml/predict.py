@@ -2,28 +2,47 @@
 """
 Interactive Startup Success Predictor for VENTURE-SCOPE
 
+⚠️ VERSION 2.0 - TEMPORAL VALIDATION COMPATIBLE
+
 This script allows users to input startup characteristics and receive
 an ML-powered prediction of success probability based on historical patterns.
 
+IMPORTANT CHANGES (v2.0):
+- Now uses random_forest_temporal.pkl (trained with temporal validation)
+- Supports cutoff_date parameter for temporal predictions
+- Warns about distribution shift when predicting on post-2013 data
+- All KPI calculations respect temporal constraints
+
 Usage:
+    # Interactive mode
     python src/venture_scope/ml/predict.py
     
-Or interactively:
+    # Programmatic mode (current prediction)
     from venture_scope.ml.predict import predict_startup
     predict_startup(funding=10000000, stage='Series A', ...)
+    
+    # Temporal validation mode (historical prediction)
+    from datetime import datetime
+    predict_startup(
+        funding=10000000, 
+        stage='Series A',
+        cutoff_date=datetime(2011, 12, 31)  # Predict as if in 2011
+    )
 """
 
 import pickle
 import pandas as pd
 import numpy as np
 from pathlib import Path
+from datetime import datetime
 from typing import Dict, Tuple, Optional
 import sys
+import warnings
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-print("🚀 VENTURE-SCOPE: Startup Success Predictor")
+print("🚀 VENTURE-SCOPE: Startup Success Predictor v2.0 (Temporal Validation)")
 print("=" * 70)
 
 
@@ -33,6 +52,10 @@ STAGES = ['Seed', 'Angel', 'Series A', 'Series B', 'Series C', 'Series D+']
 COMMON_SECTORS = ['saas', 'web', 'mobile', 'biotech', 'fintech', 'ecommerce', 
                   'enterprise', 'cleantech', 'hardware', 'other']
 COMMON_COUNTRIES = ['USA', 'GBR', 'CHN', 'CAN', 'DEU', 'FRA', 'IND', 'ISR', 'other']
+
+# Training data period (used for distribution shift warning)
+TRAINING_START = datetime(2000, 1, 1)
+TRAINING_END = datetime(2013, 12, 31)
 
 # Stage-based defaults for estimation
 STAGE_DEFAULTS = {
@@ -44,9 +67,9 @@ STAGE_DEFAULTS = {
     },
     'Angel': {
         'burn_period': 18,
-        'revenue_multiple': 0.08,
+        'revenue_multiple': 0.15,
         'rule_40_base': 90,
-        'stage_weight': 1.0
+        'stage_weight': 0.8
     },
     'Series A': {
         'burn_period': 24,
@@ -62,7 +85,7 @@ STAGE_DEFAULTS = {
     },
     'Series C': {
         'burn_period': 36,
-        'revenue_multiple': 0.80,
+        'revenue_multiple': 0.70,
         'rule_40_base': 50,
         'stage_weight': 2.5
     },
@@ -75,31 +98,41 @@ STAGE_DEFAULTS = {
 }
 
 
-# ==================== KPI CALCULATION ====================
+# ==================== KPI CALCULATION (TEMPORAL-AWARE) ====================
 
 def calculate_kpis(
     funding_amount: float,
     stage: str,
     investors_count: int,
     founded_year: int,
-    current_year: int = 2025
+    cutoff_date: Optional[datetime] = None
 ) -> Dict[str, float]:
     """
     Calculate KPIs for a startup based on basic inputs.
     
+    ⚠️ TEMPORAL VALIDATION:
+    If cutoff_date is provided, all calculations are done as if we are
+    at that date (for temporal validation). Otherwise, uses current date.
+    
     Args:
-        funding_amount: Total funding raised ($)
-        stage: Funding stage (Seed, Series A, etc.)
-        investors_count: Number of unique investors
+        funding_amount: Total funding raised ($) by cutoff_date
+        stage: Funding stage at cutoff_date
+        investors_count: Number of unique investors at cutoff_date
         founded_year: Year company was founded
-        current_year: Current year for age calculation
+        cutoff_date: Date to calculate KPIs from (default: now)
     
     Returns:
         Dictionary with all calculated KPIs
     """
+    # Determine "current" year based on cutoff_date or now
+    if cutoff_date:
+        current_year = cutoff_date.year
+    else:
+        current_year = datetime.now().year
+    
     defaults = STAGE_DEFAULTS.get(stage, STAGE_DEFAULTS['Series A'])
     
-    # Company age
+    # Company age (at cutoff date)
     age = max(1, current_year - founded_year)
     
     # Estimated Revenue
@@ -122,22 +155,26 @@ def calculate_kpis(
     burn_multiple = annual_burn / estimated_revenue if estimated_revenue > 0 else 10
     burn_multiple = min(10, max(0.3, burn_multiple))  # Clip between 0.3 and 10
     
-    # Traction Index
+    # Traction Index (raw calculation)
     funding_log = np.log10(max(100000, funding_amount))  # Min $100K
     traction_raw = (funding_log * investors_count * defaults['stage_weight']) / age
-    traction_index = min(100, traction_raw)  # Scale to 0-100
+    
+    # Normalize traction (scale to match training data)
+    # Training data range: 0.5 to 35 (approximate)
+    traction_index = ((traction_raw - 0.5) / (35 - 0.5)) * 100
+    traction_index = max(0, min(100, traction_index))
     
     # Rule of 40 (estimated)
     rule_40_adjustment = (capital_efficiency - 0.30) * 50
     rule_of_40 = defaults['rule_40_base'] + rule_40_adjustment
     rule_of_40 = max(0, min(150, rule_of_40))  # Clip 0-150
     
-    # Investment Score (weighted combination)
+    # Investment Score (weighted combination - matches temporal_split.py)
     rule_40_norm = min(100, rule_of_40)
     traction_norm = traction_index
     cap_eff_norm = capital_efficiency * 100
-    burn_norm = (1 / burn_multiple) * 50 if burn_multiple > 0 else 0
-    burn_norm = min(100, burn_norm)
+    burn_norm = (10 - burn_multiple) / 10 * 100  # Inverted and normalized
+    burn_norm = max(0, min(100, burn_norm))
     runway_norm = (runway_months / 24) * 100
     
     investment_score = (
@@ -157,7 +194,8 @@ def calculate_kpis(
         'traction_index': traction_index,
         'rule_of_40': rule_of_40,
         'investment_score': investment_score,
-        'age': age
+        'age': age,
+        'cutoff_date': cutoff_date
     }
 
 
@@ -176,30 +214,36 @@ def prepare_features(
     """
     Prepare features in the format expected by the trained model.
     
-    Creates a DataFrame with ALL columns the model expects (113 total).
+    Creates a DataFrame with ALL columns the model expects.
+    Features are prepared to match temporal_split.py format.
     """
     # Get feature names from the trained model
     if hasattr(model, 'feature_names_in_'):
         expected_features = model.feature_names_in_
+        print(f"  ✓ Model expects {len(expected_features)} features")
     else:
         # Fallback: manually create expected feature list
-        # This should match what was used during training
+        print("  ⚠ Warning: Could not get feature names from model, using fallback")
         expected_features = []
         
-        # Numeric features (8)
+        # Numeric features
         numeric_features = [
             'funding_amount', 'investors_count', 'rule_of_40', 
             'traction_index', 'capital_efficiency', 'burn_multiple',
-            'runway_months', 'investment_score'
+            'runway_months', 'investment_score', 'estimated_revenue',
+            'monthly_burn', 'age_years'
         ]
         expected_features.extend(numeric_features)
         
         # Stage features (one-hot encoded)
-        for stage_val in ['Seed', 'Angel', 'Series A', 'Series B', 'Series C', 'Series D+']:
+        for stage_val in STAGES:
             expected_features.append(f'stage_{stage_val}')
         
-        # We'll add sector and country dynamically based on what model has
-        print("⚠️  Warning: Could not get feature names from model, using fallback")
+        # Add common sectors and countries
+        for sector_val in COMMON_SECTORS:
+            expected_features.append(f'sector_{sector_val}')
+        for country_val in COMMON_COUNTRIES:
+            expected_features.append(f'country_{country_val}')
     
     # Create a dictionary with ALL features initialized to 0
     features = {feat: 0 for feat in expected_features}
@@ -214,22 +258,39 @@ def prepare_features(
     features['runway_months'] = kpis['runway_months']
     features['investment_score'] = kpis['investment_score']
     
+    # Additional features if model expects them
+    if 'estimated_revenue' in features:
+        features['estimated_revenue'] = kpis['estimated_revenue']
+    if 'monthly_burn' in features:
+        features['monthly_burn'] = kpis['monthly_burn']
+    if 'age_years' in features:
+        features['age_years'] = kpis['age']
+    
     # Fill in stage (one-hot encoding)
     stage_col = f'stage_{stage}'
     if stage_col in features:
         features[stage_col] = 1
+    else:
+        print(f"  ⚠ Warning: Stage '{stage}' not in model features")
     
     # Fill in sector (one-hot encoding)
     sector_lower = sector.lower()
     sector_col = f'sector_{sector_lower}'
     if sector_col in features:
         features[sector_col] = 1
+    else:
+        # Try to find a matching sector column
+        matching = [f for f in features if f.startswith('sector_')]
+        if matching:
+            print(f"  ℹ Note: Sector '{sector}' not in model, using default")
     
     # Fill in country (one-hot encoding)
     country_upper = country.upper()
     country_col = f'country_{country_upper}'
     if country_col in features:
         features[country_col] = 1
+    else:
+        print(f"  ℹ Note: Country '{country}' not in model, using default")
     
     # Convert to DataFrame with columns in the EXACT order expected by model
     df = pd.DataFrame([features], columns=expected_features)
@@ -239,19 +300,62 @@ def prepare_features(
 
 # ==================== MODEL LOADING ====================
 
-def load_model(model_path: str = "results/models/random_forest.pkl") -> Optional[object]:
-    """Load the trained Random Forest model."""
-    try:
-        model_file = Path(model_path)
-        if not model_file.exists():
-            print(f"❌ Model not found at {model_path}")
-            print(f"   Please run: python src/venture_scope/ml/model.py")
-            return None
+def load_model(
+    model_path: Optional[str] = None,
+    use_temporal: bool = True
+) -> Optional[object]:
+    """
+    Load the trained Random Forest model.
+    
+    Args:
+        model_path: Custom path to model. If None, uses default.
+        use_temporal: If True, loads temporal model (default).
+                     If False, loads baseline model (for comparison).
+    
+    Returns:
+        Loaded model or None if error
+    """
+    # Determine model path
+    if model_path is None:
+        if use_temporal:
+            model_path = "data/models/random_forest_temporal.pkl"
+        else:
+            model_path = "results/models/random_forest.pkl"
+    
+    model_file = Path(model_path)
+    
+    # Check if file exists
+    if not model_file.exists():
+        print(f"❌ Model not found at {model_path}")
         
+        # Try alternative locations
+        alt_paths = [
+            "results/models/random_forest_temporal.pkl",
+            "../../../data/models/random_forest_temporal.pkl",
+            "data/models/random_forest.pkl"
+        ]
+        
+        for alt_path in alt_paths:
+            if Path(alt_path).exists():
+                print(f"  ✓ Found model at alternative location: {alt_path}")
+                model_file = Path(alt_path)
+                break
+        else:
+            print(f"  ℹ Please run: python src/venture_scope/ml/model_temporal.py")
+            return None
+    
+    # Load model
+    try:
         with open(model_file, 'rb') as f:
             model = pickle.load(f)
         
-        print(f"✅ Model loaded successfully from {model_path}")
+        model_type = "Temporal" if use_temporal else "Baseline"
+        print(f"✅ {model_type} model loaded from {model_file}")
+        
+        # Display model info
+        if hasattr(model, 'n_estimators'):
+            print(f"  ℹ Model: Random Forest with {model.n_estimators} trees")
+        
         return model
     
     except Exception as e:
@@ -264,12 +368,12 @@ def load_model(model_path: str = "results/models/random_forest.pkl") -> Optional
 def predict_success(
     model,
     features: pd.DataFrame
-) -> Tuple[float, str]:
+) -> Tuple[float, str, Dict[str, float]]:
     """
     Predict success probability for a startup.
     
     Returns:
-        (probability, confidence_level)
+        (probability, confidence_level, feature_contributions)
     """
     # Get prediction probability
     prob = model.predict_proba(features)[0]
@@ -283,7 +387,91 @@ def predict_success(
     else:
         confidence = "LOW"
     
-    return success_prob, confidence
+    # Get feature importance contributions (if available)
+    feature_contributions = {}
+    if hasattr(model, 'feature_importances_'):
+        importances = model.feature_importances_
+        feature_names = model.feature_names_in_ if hasattr(model, 'feature_names_in_') else []
+        
+        # Get top 5 contributing features
+        if len(feature_names) > 0:
+            importance_dict = dict(zip(feature_names, importances))
+            sorted_features = sorted(importance_dict.items(), key=lambda x: x[1], reverse=True)[:5]
+            feature_contributions = dict(sorted_features)
+    
+    return success_prob, confidence, feature_contributions
+
+
+# ==================== DISTRIBUTION SHIFT WARNING ====================
+
+def check_distribution_shift(
+    funding_amount: float,
+    stage: str,
+    cutoff_date: Optional[datetime] = None
+) -> Dict[str, any]:
+    """
+    Check if inputs suggest distribution shift from training data.
+    
+    Training data: 2000-2013
+    Known shifts: Series A $5M (2013) → $12M (2025)
+    
+    Returns:
+        Dictionary with shift warnings
+    """
+    warnings_list = []
+    severity = "NONE"
+    
+    # Determine prediction date
+    pred_date = cutoff_date if cutoff_date else datetime.now()
+    
+    # Check if prediction is outside training period
+    if pred_date > TRAINING_END:
+        years_after = pred_date.year - TRAINING_END.year
+        warnings_list.append(
+            f"⚠️ Predicting {years_after} years after training data (model trained on 2000-2013)"
+        )
+        severity = "HIGH" if years_after > 5 else "MEDIUM"
+        
+        # Check funding amounts (known to have shifted)
+        multiplier_2025 = {
+            'Seed': 3.0,
+            'Series A': 2.4,
+            'Series B': 2.0,
+            'Series C': 1.7
+        }
+        
+        expected_2013 = {
+            'Seed': 1_500_000,
+            'Series A': 5_000_000,
+            'Series B': 12_000_000,
+            'Series C': 25_000_000
+        }
+        
+        if stage in expected_2013:
+            expected_now = expected_2013[stage] * multiplier_2025.get(stage, 1.5)
+            
+            if funding_amount > expected_now * 0.8:
+                warnings_list.append(
+                    f"⚠️ Funding amount (${funding_amount/1e6:.1f}M) is typical for {pred_date.year} "
+                    f"but {multiplier_2025.get(stage, 1.5):.1f}x higher than {stage} in 2013 (${expected_2013[stage]/1e6:.1f}M)"
+                )
+                warnings_list.append(
+                    f"   → Model may underestimate success probability"
+                )
+    
+    elif pred_date < TRAINING_START:
+        warnings_list.append(
+            f"⚠️ Predicting before training data period (model trained on 2000-2013)"
+        )
+        severity = "MEDIUM"
+    
+    return {
+        'has_shift': len(warnings_list) > 0,
+        'severity': severity,
+        'warnings': warnings_list,
+        'prediction_date': pred_date,
+        'training_period': f"{TRAINING_START.year}-{TRAINING_END.year}"
+    }
 
 
 # ==================== INTERPRETATION ====================
@@ -311,6 +499,11 @@ def interpret_prediction(
         strengths.append(f"Strong Series A (${funding_amount/1e6:.1f}M)")
     elif stage == 'Series B' and funding_amount > 20_000_000:
         strengths.append(f"Strong Series B (${funding_amount/1e6:.1f}M)")
+    
+    if stage == 'Seed' and funding_amount < 500_000:
+        concerns.append(f"Low seed funding (${funding_amount/1e6:.1f}M)")
+    elif stage == 'Series A' and funding_amount < 3_000_000:
+        concerns.append(f"Low Series A funding (${funding_amount/1e6:.1f}M)")
     
     # Investors
     if investors_count >= 5:
@@ -367,7 +560,7 @@ def get_recommendation(success_prob: float) -> str:
 
 def get_user_input() -> Dict:
     """Interactively collect startup information from user."""
-    print("\n📋 Enter startup information:")
+    print("\n📝 Enter startup information:")
     print("-" * 70)
     
     # Funding amount
@@ -376,11 +569,11 @@ def get_user_input() -> Dict:
             funding_str = input("  Funding raised (e.g., 10000000 for $10M): $")
             funding_amount = float(funding_str)
             if funding_amount <= 0:
-                print("     ⚠️  Funding must be positive")
+                print("     ❌ Funding must be positive")
                 continue
             break
         except ValueError:
-            print("     ⚠️  Please enter a valid number")
+            print("     ❌ Please enter a valid number")
     
     # Stage
     print(f"\n  Available stages: {', '.join(STAGES)}")
@@ -388,13 +581,13 @@ def get_user_input() -> Dict:
         stage = input("  Stage: ").strip()
         if stage in STAGES:
             break
-        print(f"     ⚠️  Please choose from: {', '.join(STAGES)}")
+        print(f"     ❌ Please choose from: {', '.join(STAGES)}")
     
     # Sector
     print(f"\n  Common sectors: {', '.join(COMMON_SECTORS)}")
     sector = input("  Sector: ").strip().lower()
     if not sector:
-        sector = 'other'
+        sector = 'saas'
     
     # Country
     print(f"\n  Common countries: {', '.join(COMMON_COUNTRIES)}")
@@ -407,22 +600,33 @@ def get_user_input() -> Dict:
         try:
             investors_count = int(input("  Number of investors: "))
             if investors_count < 0:
-                print("     ⚠️  Cannot be negative")
+                print("     ❌ Cannot be negative")
                 continue
             break
         except ValueError:
-            print("     ⚠️  Please enter a valid number")
+            print("     ❌ Please enter a valid number")
     
     # Founded year
     while True:
         try:
             founded_year = int(input("  Founded year (e.g., 2020): "))
             if founded_year < 1990 or founded_year > 2025:
-                print("     ⚠️  Please enter a realistic year (1990-2025)")
+                print("     ❌ Please enter a realistic year (1990-2025)")
                 continue
             break
         except ValueError:
-            print("     ⚠️  Please enter a valid year")
+            print("     ❌ Please enter a valid year")
+    
+    # Cutoff date (optional - for temporal validation)
+    print(f"\n  ℹ For temporal validation, enter cutoff date (press Enter to use current date)")
+    cutoff_str = input("  Cutoff date (YYYY-MM-DD) [optional]: ").strip()
+    cutoff_date = None
+    if cutoff_str:
+        try:
+            cutoff_date = datetime.strptime(cutoff_str, "%Y-%m-%d")
+            print(f"  ✓ Using cutoff date: {cutoff_date.date()}")
+        except ValueError:
+            print("  ⚠ Invalid date format, using current date")
     
     return {
         'funding_amount': funding_amount,
@@ -430,7 +634,8 @@ def get_user_input() -> Dict:
         'sector': sector,
         'country': country,
         'investors_count': investors_count,
-        'founded_year': founded_year
+        'founded_year': founded_year,
+        'cutoff_date': cutoff_date
     }
 
 
@@ -441,7 +646,9 @@ def display_results(
     kpis: Dict,
     success_prob: float,
     confidence: str,
-    interpretation: Dict
+    interpretation: Dict,
+    shift_check: Dict,
+    feature_contributions: Dict
 ):
     """Display prediction results in a beautiful format."""
     
@@ -458,11 +665,27 @@ def display_results(
     print(f"  Investment Score:      {kpis['investment_score']:.0f}/100")
     
     print("\n" + "=" * 70)
-    print("🔮 PREDICTION")
+    print("🎯 PREDICTION")
     print("=" * 70)
     print(f"  Success Probability:   {success_prob*100:.1f}%")
     print(f"  Confidence:            {confidence}")
     print(f"  Recommendation:        {get_recommendation(success_prob)}")
+    
+    # Display top contributing features
+    if feature_contributions:
+        print(f"\n  Top Contributing Features:")
+        for feat, importance in feature_contributions.items():
+            print(f"    • {feat}: {importance*100:.1f}%")
+    
+    # Distribution shift warnings
+    if shift_check['has_shift']:
+        print("\n" + "=" * 70)
+        print(f"⚠️ DISTRIBUTION SHIFT WARNING (Severity: {shift_check['severity']})")
+        print("=" * 70)
+        for warning in shift_check['warnings']:
+            print(f"  {warning}")
+        print(f"\n  Model trained on: {shift_check['training_period']}")
+        print(f"  Prediction date: {shift_check['prediction_date'].date()}")
     
     print("\n" + "=" * 70)
     print("💡 INTERPRETATION")
@@ -491,30 +714,34 @@ def display_results(
     
     # Concerns
     if interpretation['concerns']:
-        print(f"\n  ⚠️  Areas to Watch:")
+        print(f"\n  ⚠️ Areas to Watch:")
         for concern in interpretation['concerns']:
             print(f"     • {concern}")
     
     print("\n" + "=" * 70)
-    print("⚠️  IMPORTANT DISCLAIMER")
+    print("⚠️ IMPORTANT DISCLAIMER")
     print("=" * 70)
     print("""
-  This prediction is based on patterns from 2013 historical data.
+  This prediction is based on patterns from 2000-2013 historical data
+  with temporal validation (93.8% recall on test set).
   
   ✅ Appropriate use:
      - Benchmarking against historical successful companies
-     - Relative comparison between startups
+     - Relative comparison between startups from similar periods
      - Identifying key strengths and concerns
+     - Understanding feature importance
   
-  ❌ Limitations:
-     - Market conditions have changed since 2013
+  ⚠️ Limitations:
+     - Market conditions have changed since 2013 (distribution shift)
+     - Funding amounts are 2-3× higher now
      - Some metrics are estimated (not actual financials)
      - NOT investment advice - use for informational purposes only
   
-  For production decisions, combine with:
+  📌 For production decisions, combine with:
      - Human due diligence
      - Current market research
      - Actual financial statements
+     - Retraining on recent data (2020-2025)
     """)
     print("=" * 70)
 
@@ -527,18 +754,32 @@ def predict_startup(
     sector: Optional[str] = None,
     country: Optional[str] = None,
     investors_count: Optional[int] = None,
-    founded_year: Optional[int] = None
+    founded_year: Optional[int] = None,
+    cutoff_date: Optional[datetime] = None,
+    model_path: Optional[str] = None,
+    use_temporal: bool = True
 ) -> Optional[Dict]:
     """
     Predict startup success probability.
     
     Can be called interactively (no args) or programmatically (with args).
     
+    Args:
+        funding_amount: Total funding raised
+        stage: Funding stage (Seed, Series A, etc.)
+        sector: Industry sector
+        country: Country code (USA, GBR, etc.)
+        investors_count: Number of investors
+        founded_year: Year founded
+        cutoff_date: Optional date to predict from (for temporal validation)
+        model_path: Optional custom path to model
+        use_temporal: If True, uses temporal model (default). If False, uses baseline.
+    
     Returns:
         Dictionary with prediction results or None if error
     """
     # Load model
-    model = load_model()
+    model = load_model(model_path=model_path, use_temporal=use_temporal)
     if model is None:
         return None
     
@@ -552,21 +793,31 @@ def predict_startup(
             'sector': sector or 'saas',
             'country': country or 'USA',
             'investors_count': investors_count or 3,
-            'founded_year': founded_year or 2020
+            'founded_year': founded_year or 2020,
+            'cutoff_date': cutoff_date
         }
     
-    print("\n⏳ Calculating KPIs...")
+    print("\n⚙️ Calculating KPIs...")
     
     # Calculate KPIs
     kpis = calculate_kpis(
         funding_amount=inputs['funding_amount'],
         stage=inputs['stage'],
         investors_count=inputs['investors_count'],
-        founded_year=inputs['founded_year']
+        founded_year=inputs['founded_year'],
+        cutoff_date=inputs.get('cutoff_date')
     )
     
     print("✅ KPIs calculated")
-    print("⏳ Preparing features...")
+    
+    # Check for distribution shift
+    shift_check = check_distribution_shift(
+        funding_amount=inputs['funding_amount'],
+        stage=inputs['stage'],
+        cutoff_date=inputs.get('cutoff_date')
+    )
+    
+    print("⚙️ Preparing features...")
     
     # Prepare features for model
     features = prepare_features(
@@ -581,13 +832,15 @@ def predict_startup(
     )
     
     print("✅ Features prepared")
-    print("⏳ Running prediction...")
+    print("⚙️ Running prediction...")
     
     # Predict
     try:
-        success_prob, confidence = predict_success(model, features)
+        success_prob, confidence, feature_contributions = predict_success(model, features)
     except Exception as e:
         print(f"❌ Prediction failed: {e}")
+        import traceback
+        traceback.print_exc()
         return None
     
     print("✅ Prediction complete")
@@ -602,7 +855,10 @@ def predict_startup(
     )
     
     # Display results
-    display_results(inputs, kpis, success_prob, confidence, interpretation)
+    display_results(
+        inputs, kpis, success_prob, confidence, 
+        interpretation, shift_check, feature_contributions
+    )
     
     # Return results for programmatic use
     return {
@@ -610,7 +866,9 @@ def predict_startup(
         'kpis': kpis,
         'success_probability': success_prob,
         'confidence': confidence,
-        'interpretation': interpretation
+        'interpretation': interpretation,
+        'shift_check': shift_check,
+        'feature_contributions': feature_contributions
     }
 
 
@@ -618,9 +876,9 @@ def predict_startup(
 
 def main():
     """Command-line interface entry point."""
-    print("\nWelcome to the VENTURE-SCOPE Startup Success Predictor!")
-    print("\nThis tool predicts startup success probability based on")
-    print("machine learning trained on historical VC-backed companies.\n")
+    print("\n🚀 Welcome to the VENTURE-SCOPE Startup Success Predictor v2.0!")
+    print("\nThis tool predicts startup success probability using temporal validation.")
+    print("Model trained on 2000-2013 data with 93.8% recall.\n")
     
     while True:
         result = predict_startup()
@@ -634,7 +892,7 @@ def main():
             break
         print("\n" + "=" * 70 + "\n")
     
-    print("\n👋 Thank you for using VENTURE-SCOPE!")
+    print("\n✨ Thank you for using VENTURE-SCOPE!")
     print("=" * 70 + "\n")
 
 

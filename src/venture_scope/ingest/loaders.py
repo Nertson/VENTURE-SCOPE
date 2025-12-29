@@ -90,9 +90,9 @@ def _coalesce(df: pd.DataFrame, cands: list[str], new_col: str, verbose: bool = 
     
     if verbose:
         if found_cols:
-            print(f"  ℹ️  Coalesced '{new_col}' from: {', '.join(found_cols)}")
+            print(f"    Coalesced '{new_col}' from: {', '.join(found_cols)}")
         else:
-            print(f"  ⚠️  No candidate columns found for '{new_col}'")
+            print(f"    No candidate columns found for '{new_col}'")
     
     return s.rename(new_col)
 
@@ -104,7 +104,7 @@ def _data_quality_report(df: pd.DataFrame) -> None:
     Args:
         df: DataFrame to analyze
     """
-    print("\n📊 Data Quality Report:")
+    print("\n Data Quality Report:")
     print("=" * 60)
     
     for col in df.columns:
@@ -114,7 +114,7 @@ def _data_quality_report(df: pd.DataFrame) -> None:
         if pct > 0:
             print(f"  {col:20s}: {missing:6,} missing ({pct:5.1f}%)")
         else:
-            print(f"  {col:20s}: ✅ Complete")
+            print(f"  {col:20s}:  Complete")
     
     print("=" * 60)
 
@@ -173,7 +173,7 @@ def load_startups_csv(path: str | Path, verbose: bool = True, filter_funded: boo
         raise FileNotFoundError(f"CSV file not found: {path}")
     
     if verbose:
-        print(f"📂 Loading startups from: {path.name}")
+        print(f" Loading startups from: {path.name}")
     
     # Load CSV with low_memory=False to avoid dtype warnings
     df = pd.read_csv(path, low_memory=False)
@@ -182,7 +182,7 @@ def load_startups_csv(path: str | Path, verbose: bool = True, filter_funded: boo
         raise ValueError(f"CSV file is empty: {path}")
     
     if verbose:
-        print(f"✅ Loaded {len(df):,} rows with {len(df.columns)} columns")
+        print(f" Loaded {len(df):,} rows with {len(df.columns)} columns")
 
      # CRITICAL: Filter only companies (not people, investors, products, etc.)
     if 'entity_type' in df.columns:
@@ -190,7 +190,7 @@ def load_startups_csv(path: str | Path, verbose: bool = True, filter_funded: boo
         df = df[df['entity_type'] == 'Company'].copy()
         if verbose:
             filtered_count = original_count - len(df)
-            print(f"  🔍 Filtered out {filtered_count:,} non-company entities (kept only Companies)")
+            print(f"  Filtered out {filtered_count:,} non-company entities (kept only Companies)")
     
     # Find and rename company column
     if "company" not in df.columns:
@@ -198,7 +198,7 @@ def load_startups_csv(path: str | Path, verbose: bool = True, filter_funded: boo
             if cand in df.columns:
                 df = df.rename(columns={cand: "company"})
                 if verbose:
-                    print(f"  ℹ️  Renamed '{cand}' → 'company'")
+                    print(f"   Renamed '{cand}' → 'company'")
                 break
     
     # Standardize stage
@@ -227,11 +227,11 @@ def load_startups_csv(path: str | Path, verbose: bool = True, filter_funded: boo
                         # Extract year from date
                         df[target_col] = pd.to_datetime(df[cand], errors="coerce").dt.year
                         if verbose:
-                            print(f"  ℹ️  Extracted year from '{cand}' → '{target_col}'")
+                            print(f"  Extracted year from '{cand}' → '{target_col}'")
                     else:
                         df[target_col] = pd.to_numeric(df[cand], errors="coerce")
                         if verbose:
-                            print(f"  ℹ️  Mapped '{cand}' → '{target_col}'")
+                            print(f"  Mapped '{cand}' → '{target_col}'")
                     break
         else:
             # Column already exists, just convert type
@@ -261,10 +261,10 @@ def load_startups_csv(path: str | Path, verbose: bool = True, filter_funded: boo
     # - Project scope: VC investment decision-making (not bootstrapped companies)
     # 
     # Trade-offs:
-    # - ✅ Cleaner dataset for VC-specific analysis
-    # - ✅ Enables calculation of funding-dependent KPIs
-    # - ❌ Introduces selection bias (excludes bootstrapped successes)
-    # - ❌ Reduces dataset size (~78% of companies filtered out)
+    # -  Cleaner dataset for VC-specific analysis
+    # -  Enables calculation of funding-dependent KPIs
+    # -  Introduces selection bias (excludes bootstrapped successes)
+    # -  Reduces dataset size (~78% of companies filtered out)
     # 
     # This decision is documented in METHODOLOGY.md and the technical report.
     
@@ -273,11 +273,11 @@ def load_startups_csv(path: str | Path, verbose: bool = True, filter_funded: boo
     if verbose:
         after_filter = len(out)
         removed = before_filter - after_filter
-        print(f"\n🔍 Filtered: Kept {after_filter:,} companies with funding > $0")
+        print(f"\n Filtered: Kept {after_filter:,} companies with funding > $0")
         print(f"   Removed: {removed:,} companies with $0 or missing funding")
     
     if verbose:
-        print(f"✨ Standardized to {len(out):,} rows × {len(out.columns)} columns")
+        print(f" Standardized to {len(out):,} rows × {len(out.columns)} columns")
         _data_quality_report(out)
     
     return out
@@ -296,15 +296,15 @@ if __name__ == "__main__":
         filter_funded = "--filter" in sys.argv
         
         df = load_startups_csv(test_path, filter_funded=filter_funded)
-        print(f"\n✅ Successfully loaded and standardized {len(df):,} startups!")
-        print(f"\n📋 Sample (first 5 rows):\n")
+        print(f"\n Successfully loaded and standardized {len(df):,} startups!")
+        print(f"\n Sample (first 5 rows):\n")
         print(df.head())
         
         # Save to processed directory
         output_path = Path("data/processed/startups_clean.csv")
         output_path.parent.mkdir(parents=True, exist_ok=True)
         df.to_csv(output_path, index=False)
-        print(f"\n💾 Saved to: {output_path}")
+        print(f"\n Saved to: {output_path}")
     else:
         print("Usage: python loaders.py <path_to_csv> [--filter]")
         print("  --filter: Keep only companies with funding data")

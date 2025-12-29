@@ -23,7 +23,7 @@ from sklearn.metrics import (
 import time
 
 print("=" * 70)
-print("🔬 VENTURE-SCOPE: Formal Model Comparison")
+print(" VENTURE-SCOPE: Formal Model Comparison")
 print("=" * 70)
 
 
@@ -34,12 +34,12 @@ def load_data():
     data_path = Path("data/processed/startups_scored.csv")
     
     if not data_path.exists():
-        print(f"❌ Data not found at {data_path}")
+        print(f" Data not found at {data_path}")
         print("   Run: python src/venture_scope/analysis/kpi_calculator.py")
         return None
     
     df = pd.read_csv(data_path)
-    print(f"✅ Loaded {len(df):,} companies with KPIs")
+    print(f" Loaded {len(df):,} companies with KPIs")
     return df
 
 
@@ -58,7 +58,7 @@ def prepare_ml_data(df):
     # Create binary label
     df_ml['success'] = (df_ml['status'].isin(['acquired', 'ipo'])).astype(int)
     
-    print(f"\n📊 ML Dataset:")
+    print(f"\n ML Dataset:")
     print(f"   Total: {len(df_ml):,} companies")
     print(f"   Success: {df_ml['success'].sum():,} ({df_ml['success'].mean()*100:.1f}%)")
     print(f"   Failure: {(1-df_ml['success']).sum():,} ({(1-df_ml['success'].mean())*100:.1f}%)")
@@ -90,7 +90,7 @@ def prepare_ml_data(df):
     X = X.fillna(0)
 
     print(f"   NaN values after: {X.isna().sum().sum()}")
-    print(f"   ✅ Data cleaned!")
+    print(f"    Data cleaned!")
     
     # Train/test split (stratified to maintain class balance)
     X_train, X_test, y_train, y_test = train_test_split(
@@ -100,7 +100,7 @@ def prepare_ml_data(df):
         stratify=y
     )
     
-    print(f"\n✅ Features prepared: {X.shape[1]} features")
+    print(f"\n Features prepared: {X.shape[1]} features")
     print(f"   Train: {len(X_train):,} | Test: {len(X_test):,}")
     
     return X_train, X_test, y_train, y_test, X.columns.tolist()
@@ -227,11 +227,11 @@ def compare_models(X_train, X_test, y_train, y_test):
     results = []
     
     print("\n" + "=" * 70)
-    print("🔬 Training & Evaluating Models")
+    print(" Training & Evaluating Models")
     print("=" * 70)
     
     for model_name, (model, needs_scaling) in models.items():
-        print(f"\n⏳ Training {model_name}...")
+        print(f"\n Training {model_name}...")
         
         metrics, trained_model = train_and_evaluate(
             model, X_train, X_test, y_train, y_test, needs_scaling
@@ -249,12 +249,12 @@ def compare_models(X_train, X_test, y_train, y_test):
             'Training Time (s)': metrics['training_time']
         })
         
-        print(f"   ✅ Accuracy:  {metrics['accuracy']:.4f}")
-        print(f"   ✅ Precision: {metrics['precision']:.4f}")
-        print(f"   ✅ Recall:    {metrics['recall']:.4f}")
-        print(f"   ✅ F1-Score:  {metrics['f1_score']:.4f}")
-        print(f"   ✅ ROC-AUC:   {metrics['roc_auc']:.4f}")
-        print(f"   ⏱️  Time:      {metrics['training_time']:.2f}s")
+        print(f"    Accuracy:  {metrics['accuracy']:.4f}")
+        print(f"    Precision: {metrics['precision']:.4f}")
+        print(f"    Recall:    {metrics['recall']:.4f}")
+        print(f"    F1-Score:  {metrics['f1_score']:.4f}")
+        print(f"    ROC-AUC:   {metrics['roc_auc']:.4f}")
+        print(f"    Time:      {metrics['training_time']:.2f}s")
     
     df_results = pd.DataFrame(results)
     return df_results
@@ -265,7 +265,7 @@ def compare_models(X_train, X_test, y_train, y_test):
 def display_comparison(df_results):
     """Display formatted comparison table."""
     print("\n" + "=" * 70)
-    print("📊 FORMAL MODEL COMPARISON RESULTS")
+    print(" FORMAL MODEL COMPARISON RESULTS")
     print("=" * 70)
     print()
     print(df_results.to_string(index=False))
@@ -273,7 +273,7 @@ def display_comparison(df_results):
     
     # Identify best model for each metric
     print("=" * 70)
-    print("🏆 BEST MODELS BY METRIC")
+    print(" BEST MODELS BY METRIC")
     print("=" * 70)
     
     metrics = ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'ROC-AUC']
@@ -284,7 +284,7 @@ def display_comparison(df_results):
         print(f"  {metric:12s}: {best_model:25s} ({best_value:.4f})")
     
     print("\n" + "=" * 70)
-    print("💡 RECOMMENDATION")
+    print(" RECOMMENDATION")
     print("=" * 70)
     
     # For VC context, prioritize Recall (don't miss winners)
@@ -314,7 +314,7 @@ def save_results(df_results):
     output_path = output_dir / "model_comparison.csv"
     df_results.to_csv(output_path, index=False)
     
-    print(f"\n💾 Results saved to: {output_path}")
+    print(f"\n Results saved to: {output_path}")
 
 
 # ==================== MAIN ====================
@@ -340,7 +340,7 @@ def main():
     save_results(df_results)
     
     print("\n" + "=" * 70)
-    print("✅ Model comparison complete!")
+    print(" Model comparison complete!")
     print("=" * 70)
 
 
