@@ -645,42 +645,6 @@ What constituted a "strong signal" in 2013 ≠ "strong signal" in 2025:
 
 ---
 
-## Defense Talking Points
-
-**Q: "Why can't you just use this model for 2025 startups?"**
-
-A: "Three reasons:
-
-1. **Distribution shift**: Funding amounts have 2-3× increased. A $5M Series A was strong in 2013, below-average in 2025. Model learned $5M = success, but that calibration is wrong now.
-
-2. **Definition shift**: What constitutes 'exceptional' has changed. 2013's 99th percentile funding is 2025's 60th percentile.
-
-3. **Market dynamics**: Unicorn count +2,980%, VC deployed +850%, time to exit +67%. Success factors have evolved.
-
-The model is valuable for **historical analysis** and **relative benchmarking within 2013 cohort**, but requires retraining on 2020-2025 data for production use."
-
-**Q: "How much would performance degrade on 2025 startups?"**
-
-A: "Based on distribution analysis:
-
-- **Predicted probabilities**: Overestimated by 20-30 percentage points (model thinks 95%, reality is 65%)
-- **Calibration**: Completely broken (predicted 70% doesn't mean 70% success rate)
-- **Discrimination**: Still works somewhat (ranking companies), but thresholds wrong
-
-It's like using a 2013 housing price model in 2025 after 200% appreciation - rankings might be okay, but predicted prices are systematically too low."
-
-**Q: "Is this a flaw in your work?"**
-
-A: "No, it's **honest documentation of limitations**. Every ML model has a validity window. I've:
-
-1. Explicitly quantified the distribution shift (+140% Series A funding)
-2. Documented why 2025 predictions would fail
-3. Specified what would be required for deployment (retraining on 2020-2025 data)
-
-This demonstrates **critical thinking** and **scientific rigor** - understanding where models break is as important as building them."
-
----
-
 ## Visualizations
 
 The following charts have been generated in `results/distribution_shift/`:

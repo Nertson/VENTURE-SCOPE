@@ -4,7 +4,7 @@ Model Comparison: Baseline vs Temporal Validation
 Compares random split (baseline) with temporal split (rigorous) models to:
 1. Quantify impact of look-ahead bias elimination
 2. Generate comparison visualizations
-3. Create defense-ready comparison report
+3. Create comparison report
 """
 
 import pandas as pd
@@ -485,19 +485,6 @@ The following charts have been generated:
 
 ---
 
-## Defense Talking Points
-
-**Q: "Why did performance drop from 76% to 73%?"**
-
-A: "The 3% drop quantifies the impact of eliminating look-ahead bias. The baseline (76%) was artificially inflated because the random split mixed companies from all years, allowing the model to 'learn' from post-outcome data. The temporal validation (73%) is more honest—it truly predicts forward in time without seeing future funding rounds. This 3% is the cost of methodological rigor."
-
-**Q: "Is 85% recall still acceptable?"**
-
-A: "Yes. In VC portfolio theory, capturing 8-9 out of 10 winners is strong. Missing 1-2 winners is less costly than the methodological flaw of using contaminated data. Plus, {self.temporal_test['recall']*100:.1f}% recall with rigorous validation is more trustworthy than 90% with look-ahead bias."
-
-**Q: "Can you prove there's no look-ahead bias now?"**
-
-A: "Yes. [Show test_temporal_split.py results] 17/17 critical tests pass, including tests that verify no funding rounds after cutoff dates appear in features. The model trained on 2010 data cannot see 2011-2013 funding, eliminating the bias."
 
 ---
 

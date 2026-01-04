@@ -23,12 +23,12 @@ Arthur Pillet | January 2025
 
 ## Key Findings
 
-| Metric | Value | Interpretation |
-|--------|-------|----------------|
-| **Accuracy** | 76.0% | Correctly classifies 3/4 outcomes |
-| **Recall** | 90.1% | Captures 9/10 successful startups |
-| **Precision** | 75.7% | 3/4 predicted successes are real |
-| **Companies Analyzed** | 27,874 | VC-backed startups (2000-2013) |
+| Metric                 | Value  | Interpretation                    |
+|------------------------|--------|-----------------------------------|
+| **Accuracy**           | 76.0%  | Correctly classifies 3/4 outcomes |
+| **Recall**             | 90.1%  | Captures 9/10 successful startups |
+| **Precision**          | 75.7%  | 3/4 predicted successes are real  |
+| **Companies Analyzed** | 27,874 | VC-backed startups (2000-2013)    |
 
 **Top Predictors**:
 1. Funding amount (25.9%) - confirms prior literature
@@ -60,12 +60,12 @@ Arthur Pillet | January 2025
 ### Model Selection
 Random Forest chosen over 3 alternatives:
 
-| Model | Accuracy | Recall | Justification |
-|-------|----------|--------|---------------|
-| **Random Forest** | 76.0% | **90.1%** | Highest recall (critical for VC) |
-| Gradient Boosting | 76.3% | 84.5% | Lower recall |
-| Logistic Regression | 70.6% | 70.2% | Insufficient recall |
-| SVM | 67.3% | 66.4% | Lowest performance |
+| Model               | Accuracy | Recall | Justification                |
+|---------------------|----------|--------|------------------------------|
+| **Random Forest**   | 76.0%    | **90.1%** | Highest recall (critical for VC) |
+| Gradient Boosting   | 76.3%    | 84.5%  | Lower recall                 |
+| Logistic Regression | 70.6%    | 70.2%  | Insufficient recall          |
+| SVM                 | 67.3%    | 66.4%  | Lowest performance           |
 
 **Decision criterion**: Maximize recall due to VC asymmetric payoffs (missing a unicorn costs 100x-1000x, backing a failure costs 1x).
 
@@ -78,16 +78,39 @@ VENTURE-SCOPE/
 ├── data/
 │   ├── raw/                      # Crunchbase CSVs (not in repo)
 │   └── processed/                # Cleaned datasets with KPIs
+│       ├── startups_clean.csv
 │       ├── startups_enriched.csv
 │       ├── startups_scored.csv
-│       └── ml_dataset.csv
+│       ├── startups_with_kpis.csv
+│       ├── top_100_startups.csv
+├── docs/
+│   ├── API.md
+│   ├── TEST_SUITE_GUIDE.md       # Test explanations 
+│   └── LITERATURE_REVIEW.md      # Academic positioning
+└── examples/
+│    └── create_visualizations_old.py # Old version
+│    └── create_visualizations_v2.py  # Creates visualizations
+│    └── missing_data_analysis.py     # Investigates patterns in missing data to understand if there are
+│                                       systematic biases
+└── models/                           # Random forest model
+├── results/
+│   ├── figures/                  # 9 publication-quality visualizations
+│   └── models/                   # Trained models (pickled)
+├── scripts/
+│   ├── compare_models.py/               # Compares random split (baseline) with temporal split (rigorous) models    
+│   └── distribution_shifts_analysis.py/ # Distribution Shift Analysis: 2013 vs 2025
+│   └── error_analysis.py/               # Error Analysis for Temporal Model
+│   └── temporal_split.py/               # Temporal split on the data base
 ├── src/venture_scope/
 │   ├── ingest/
 │   │   └── loaders_enriched.py   # Data loading & enrichment
+│   │   └── loaders.py            # Older version of loaders_enriched.py
 │   ├── features/
 │   │   ├── kpi.py                # KPI calculations
 │   │   └── scoring.py            # Investment scoring
 │   └── ml/
+│       ├── model_comparison.py   # Compares multiple ML models on the startup success prediction task.
+│       ├── model_temporal.py     # ML Model Training with Temporal Validation
 │       ├── model.py              # Model training
 │       └── predict.py            # Inference system
 ├── tests/                        # 68 tests (98% pass rate)
@@ -96,16 +119,7 @@ VENTURE-SCOPE/
 │   ├── test_loaders.py
 │   ├── test_model.py
 │   └── test_predict.py
-├── results/
-│   ├── figures/                  # 9 publication-quality visualizations
-│   └── models/                   # Trained models (pickled)
-├── docs/
-│   ├── METHODOLOGY.md            # Detailed technical documentation
-│   ├── EXECUTIVE_SUMMARY.md      # 2-page project overview
-│   ├── TEST_SUITE_GUIDE.md       # Test explanations for defense
-│   └── LITERATURE_REVIEW.md      # Academic positioning
-└── examples/
-    └── create_visualizations.py  # Generate all figures
+
 ```
 
 ---
@@ -129,7 +143,7 @@ pip install -r requirements.txt --break-system-packages
 pytest tests/ -v
 ```
 
-### Running the Pipeline
+### Running the Pipeline A
 
 **Step 1: Load and enrich data**
 ```bash
@@ -155,23 +169,72 @@ python src/venture_scope/features/scoring.py
 ```
 Output: `data/processed/startups_scored.csv` with 0-100 scores
 
-**Step 4: Train ML model**
-```bash
-python src/venture_scope/ml/model.py
-```
-Trains Random Forest, evaluates on test set, saves to `results/models/`
-
-**Step 5: Make predictions**
-```bash
-python src/venture_scope/ml/predict.py
-```
-Interactive system for scoring new companies
-
-**Generate visualizations**
+**Step 4: Generate visualizations**
 ```bash
 python examples/create_visualizations.py
 ```
 Produces 9 figures in `results/figures/`
+
+**Step 5: Missing data analysis**
+```bash
+python exemples/missing_data_analysis.py
+```
+Performs statistical tests to evaluate the impact of missing investor/funding data on model validity
+
+### Running the Pipeline B
+
+**Step 1: Temporal Split**
+```bash
+
+python scripts/temporal_split.py
+```
+Splits data strictly by date (Train 2000-2010 | Val 2011 | Test 2012-2013) to eliminate look-ahead bias.
+
+**Step 2: Train Temporal Model**
+```bash
+python src/venture_scope/ml/model_temporal.py
+```
+Trains the primary Random Forest model using the strict temporal split configuration.
+
+**Step 3: Compare Models**
+```bash
+python scripts/compare_models.py
+```
+Generates visualizations comparing the performance of the Temporal Model vs. the Baseline Model.
+
+**Step 4: Error Analysis**
+```bash
+python scripts/error_analysis.py
+```
+Segments prediction errors by Funding Stage and Amount to identify model weaknesses (e.g., Seed stage difficulty).
+
+**Step 5: Distribution Shift Analysis**
+```bash
+
+python scripts/distribution_shift_analysis.py
+```
+Quantifies the data drift between the training era (2013) and modern market conditions.
+
+**Step 6: Train Baseline Model**
+```bash
+
+python src/venture_scope/ml/model.py
+```
+Trains a Baseline Model (using random K-Fold splitting) to serve as a benchmark for performance comparison.
+
+**Step 7: Advanced Model Comparison**
+```bash
+python src/venture_scope/ml/model_comparison.py
+```
+Computes detailed metrics (ROC-AUC, Precision-Recall) for final validation between models.
+
+**Step 8: Run Unit Tests**
+```bash
+python tests/test_temporal_split.py
+```
+Runs unit tests to strictly verify that no future data leaks into the training set.
+
+
 
 ---
 
@@ -324,33 +387,20 @@ pytest tests/test_predict.py -v    # Prediction system tests
 - Integration (full pipeline runs end-to-end)
 - Scalability (processes 27,874 companies without errors)
 
-See `docs/TEST_SUITE_GUIDE.md` for detailed test explanations and defense preparation.
+See `docs/TEST_SUITE_GUIDE.md` for detailed test explanations.
 
 ---
 
 ## Documentation
 
-| Document | Purpose | Length |
-|----------|---------|--------|
-| **EXECUTIVE_SUMMARY.md** | 2-page project overview | 2 pages |
-| **METHODOLOGY.md** | Detailed technical documentation | 850 lines |
-| **LITERATURE_REVIEW.md** | Academic positioning | 600 lines |
-| **TEST_SUITE_GUIDE.md** | Test explanations, defense prep | 850 lines |
-| **AI_USAGE.md** | AI assistance disclosure | 400 lines |
-
+| Document                 | Purpose                  |
+|--------------------------|--------------------------|
+| **LITERATURE_REVIEW.md** | Academic positioning.    | 
+| **TEST_SUITE_GUIDE.md**  | Test explanations        | 
+| **AI_USAGE.md**          | AI assistance disclosure | 
 ---
 
-## Roadmap & Future Work
-
-### Current Status (95% Complete)
-- [x] Data pipeline
-- [x] Feature engineering (7 KPIs)
-- [x] ML model training & evaluation
-- [x] Test suite (68 tests)
-- [x] Visualizations (9 figures)
-- [x] Documentation (5 files)
-- [ ] Technical report (10-12 pages PDF) - in progress
-- [ ] Presentation slides (10 slides) - pending
+## Future Work
 
 ### Future Improvements (Beyond Scope)
 

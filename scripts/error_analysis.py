@@ -7,7 +7,6 @@ Analyzes prediction errors to understand:
 3. Patterns in errors by stage, sector, funding amount
 4. Actionable insights for model improvement
 
-Critical for defense: "Which startups does your model miss?"
 """
 
 import pandas as pd
@@ -692,46 +691,6 @@ The following charts have been generated in `results/error_analysis/`:
 
 ---
 
-## Defense Talking Points
-
-**Q: "Which startups does your model miss?"**
-
-A: "The model primarily misses three types of winners:
-
-1. **Early-stage**: Seed and Angel companies have ~{self.stage_analysis[self.stage_analysis['stage']=='Seed']['fn_rate'].values[0] if 'Seed' in self.stage_analysis['stage'].values else 0:.1f}% miss rate vs ~{self.stage_analysis[self.stage_analysis['stage']=='Series C']['fn_rate'].values[0] if 'Series C' in self.stage_analysis['stage'].values else 0:.1f}% for Series C
-
-2. **Lower-funded**: Companies with <$5M funding have {self.funding_analysis[self.funding_analysis['bucket']=='$1-5M']['fn_rate'].values[0] if '$1-5M' in self.funding_analysis['bucket'].values else 0:.1f}% miss rate
-
-3. **'Underdog' winners**: Missed winners have {self.fn_data['predicted_proba'].mean():.3f} avg probability vs {self.tp_data['predicted_proba'].mean():.3f} for caught winners
-
-This makes sense: early-stage, lower-funded companies have less signal in quantitative metrics. Human judgment most valuable here."
-
-**Q: "How would you improve this?"**
-
-A: "Three approaches:
-
-1. **Better features**: Add qualitative data (founder background, team composition, product-market fit signals)
-
-2. **Stage-specific models**: Train separate models for Seed vs Series B (different signal patterns)
-
-3. **Ensemble with domain rules**: Hybrid model combining ML predictions with VC heuristics
-
-The {self.tp_count/(self.fn_count+self.tp_count)*100:.1f}% recall is strong, but the {self.fn_count} missed winners represent potential $100M+ in missed unicorns."
-
-**Q: "What's the business impact of these errors?"**
-
-A: "In VC portfolio theory:
-
-- Missing 1 unicorn (FN) = -$100M+ opportunity cost
-- Backing 1 failure (FP) = -$1M investment
-
-Model misses {self.fn_count} winners. If 1-2 are unicorns, that's -$200M+ opportunity cost.
-
-However, model still captures {self.tp_count} of {self.fn_count+self.tp_count} winners ({self.tp_count/(self.fn_count+self.tp_count)*100:.1f}% recall), which is strong for a quantitative-only model.
-
-Trade-off: Use model as first filter (80% recall threshold), then human review narrows to final portfolio."
-
----
 
 ## Actionable Recommendations
 

@@ -1,6 +1,6 @@
 # Temporal Split - OPTIMIZED VERSION 
 
-#Uses vectorized pandas operations instead of row-by-row loops.
+# Uses vectorized pandas operations instead of row-by-row loops.
 ""
 
 import pandas as pd

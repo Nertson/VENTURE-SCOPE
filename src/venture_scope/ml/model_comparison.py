@@ -2,9 +2,6 @@
 Formal Model Comparison for VENTURE-SCOPE
 
 Compares multiple ML models on the startup success prediction task.
-Addresses professor feedback: "include a prominent section on the 
-application of data science / machine learning methods, including 
-if necessary a formal model comparison procedure."
 """
 
 import pandas as pd
