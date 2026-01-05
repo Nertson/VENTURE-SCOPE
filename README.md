@@ -127,22 +127,35 @@ VENTURE-SCOPE/
 ## Installation & Usage
 
 ### Prerequisites
-- Python 3.13+
+- Python 3.10+
 - Crunchbase 2013 dataset (not included - proprietary)
 
 ### Setup
 ```bash
 # Clone repository
-git clone https://github.com/apillet/VENTURE-SCOPE.git
+git clone https://github.com/Nertson/VENTURE-SCOPE.git
 cd VENTURE-SCOPE
 
-# Download data set 
-# download the dataset startups.csv from [https://www.kaggle.com/datasets/mauriciocap/crunchbase2013?select=README.md and place it in the data/raw/ folder before running Pipeline A."
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# Mac/Linux:
+source venv/bin/activate
+```
+
+### Download data set 
+- download the dataset startups.csv from https://www.kaggle.com/datasets/mauriciocap/crunchbase2013?select=README.md and place it in the data/raw/ folder before running Pipeline A."
 
 # Install dependencies
-pip install -r requirements.txt --break-system-packages
+```bash
+pip install -r requirements.txt 
+```
 
 # Verify installation
+```bash
 pytest tests/ -v
 ```
 
@@ -159,6 +172,7 @@ python main.py
 python src/venture_scope/ingest/loaders_enriched.py data/raw/
 ```
 Output: `data/processed/startups_enriched.csv` (27,874 companies)
+> **Note**: If `data/raw/` is missing but `data/processed/startups_enriched.csv` exists, you can skip this step by commenting out `"src/venture_scope/ingest/loaders_enriched.py"` in `PIPELINE_A` within `main.py`
 
 **Step 2: Calculate KPIs**
 ```bash
