@@ -50,7 +50,7 @@ Arthur Pillet | January 2025
 - **Target**: Binary success (acquired/IPO vs closed)
 - **Filtering justification**: T-test shows companies with missing investor data have significantly lower funding (p<0.001)
 
-### Machine Learning Pipeline
+### Machine Learning Pipeline A
 1. **Data loading**: Multi-CSV merge (companies, funding rounds, investments)
 2. **Feature engineering**: 7 domain-specific KPIs calculated
 3. **Scoring**: Composite investment score (0-100 scale)
@@ -69,11 +69,35 @@ Random Forest chosen over 3 alternatives:
 
 **Decision criterion**: Maximize recall due to VC asymmetric payoffs (missing a unicorn costs 100x-1000x, backing a failure costs 1x).
 
+### Machine Learning Pipeline B (Temporal Validation)
+
+> **Note**: Pipeline B was developed after identifying look-ahead bias in Pipeline A. Implemented separately in `scripts/` to preserve the working baseline and enable direct comparison.
+
+1. **Temporal split**: Strict chronological separation (Train: 2000-2010 | Val: 2010-2011 | Test: 2011-2013)
+2. **Feature filtering**: Only information available at funding date (no future data leakage)
+3. **Model training**: Random Forest (100 trees, max depth 11, class_weight='balanced')
+4. **Validation**: 18 automated tests verify temporal integrity
+5. **Error analysis**: Performance segmented by funding stage and amount
+
+### Performance Comparison
+
+| Pipeline                  | Accuracy | Recall.   | Precision | F1-Score |
+|---------------------------|----------|-----------|-----------|----------|
+| **Pipeline B (Temporal)** | 75.8%    | **93.8%** | 75.9%.    | 83.9%.   |
+| Pipeline A (Baseline)     | 76.0%    | 90.1%     | 75.7%     | 82.2%    |
+| **Difference**            | -0.2%    | **+3.7%** | +0.2%     | +1.7%    |
+
+**Key Finding**: Counter-intuitively, stricter temporal constraints *improved* recall by 3.7 percentage points. Removing leaky features forced the model to learn genuine predictive patterns rather than memorizing outcomes.
+
+**Decision criterion**: Pipeline B is the primary model. Higher recall with rigorous methodology provides more reliable and generalizable results.
+
 ---
 
 ## Project Structure
+Note: The scripts/ directory was added later to address look-ahead bias without disrupting the existing working pipeline. Legacy files (e.g., loaders.py, create_visualizations_old.py) are intentionally kept for version comparison purposes.
 
 ```
+
 VENTURE-SCOPE/
 ├── data/
 │   ├── raw/                      # Crunchbase CSVs (not in repo)
@@ -109,9 +133,9 @@ VENTURE-SCOPE/
 │   │   ├── kpi.py                # KPI calculations
 │   │   └── scoring.py            # Investment scoring
 │   └── ml/
-│       ├── model_comparison.py   # Compares multiple ML models on the startup success prediction task.
+│       ├── model_comparison.py   # Compares multiple ML models on the startup success prediction task without    
 │       ├── model_temporal.py     # ML Model Training with Temporal Validation
-│       ├── model.py              # Model training
+│       ├── model.py              # Model training with random split
 │       └── predict.py            # Inference system
 ├── tests/                        # 68 tests (98% pass rate)
 │   ├── test_kpi.py
@@ -137,6 +161,8 @@ git clone https://github.com/Nertson/VENTURE-SCOPE.git
 cd VENTURE-SCOPE
 
 # Create virtual environment
+# This isolates project dependencies from your system Python,
+# ensuring reproducibility and avoiding version conflicts.
 python -m venv venv
 
 # Activate virtual environment
@@ -473,12 +499,12 @@ See `docs/TEST_SUITE_GUIDE.md` for detailed test explanations.
 If you use this work, please cite:
 
 ```bibtex
-@mastersthesis{pillet2025venturescope,
+@datascienceproject{pillet2025venturescope,
   title={VENTURE-SCOPE: Retrospective Analysis of Venture Capital Success Factors Using Machine Learning},
   author={Pillet, Arthur},
   year={2025},
   school={HEC Lausanne, Universit\'e de Lausanne},
-  type={Master's Thesis}
+  type={Data Science Project}
 }
 ```
 
@@ -496,7 +522,7 @@ This project is submitted as academic work for evaluation purposes. Code and doc
 
 **Author**: Arthur Pillet  
 **Institution**: HEC Lausanne, Université de Lausanne  
-**Program**: Master en Management  
+**Program**: Master en Finance 
 **Year**: 2025
 
 For questions regarding this work, please contact through the university.
@@ -505,5 +531,5 @@ For questions regarding this work, please contact through the university.
 
 ## Acknowledgments
 
-This project was completed with AI assistance (Claude, Anthropic). Full disclosure of AI usage documented in `docs/AI_USAGE.md`. All code modifications, testing, and analysis performed by the author to demonstrate understanding.
+This project was completed with AI assistance (Claude,Chatgpt and  Anthropic). Full disclosure of AI usage documented in `docs/AI_USAGE.md`. All code modifications, testing, and analysis were performed by myself.
 

@@ -2,7 +2,7 @@
 """
 Interactive Startup Success Predictor for VENTURE-SCOPE
 
-⚠️ VERSION 2.0 - TEMPORAL VALIDATION COMPATIBLE
+ VERSION 2.0 - TEMPORAL VALIDATION COMPATIBLE
 
 This script allows users to input startup characteristics and receive
 an ML-powered prediction of success probability based on historical patterns.
@@ -42,7 +42,7 @@ import warnings
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-print("🚀 VENTURE-SCOPE: Startup Success Predictor v2.0 (Temporal Validation)")
+print("VENTURE-SCOPE: Startup Success Predictor v2.0 (Temporal Validation)")
 print("=" * 70)
 
 
@@ -110,7 +110,7 @@ def calculate_kpis(
     """
     Calculate KPIs for a startup based on basic inputs.
     
-    ⚠️ TEMPORAL VALIDATION:
+     TEMPORAL VALIDATION:
     If cutoff_date is provided, all calculations are done as if we are
     at that date (for temporal validation). Otherwise, uses current date.
     
@@ -326,7 +326,7 @@ def load_model(
     
     # Check if file exists
     if not model_file.exists():
-        print(f"❌ Model not found at {model_path}")
+        print(f" Model not found at {model_path}")
         
         # Try alternative locations
         alt_paths = [
@@ -350,7 +350,7 @@ def load_model(
             model = pickle.load(f)
         
         model_type = "Temporal" if use_temporal else "Baseline"
-        print(f"✅ {model_type} model loaded from {model_file}")
+        print(f" {model_type} model loaded from {model_file}")
         
         # Display model info
         if hasattr(model, 'n_estimators'):
@@ -359,7 +359,7 @@ def load_model(
         return model
     
     except Exception as e:
-        print(f"❌ Error loading model: {e}")
+        print(f" Error loading model: {e}")
         return None
 
 
@@ -428,7 +428,7 @@ def check_distribution_shift(
     if pred_date > TRAINING_END:
         years_after = pred_date.year - TRAINING_END.year
         warnings_list.append(
-            f"⚠️ Predicting {years_after} years after training data (model trained on 2000-2013)"
+            f" Predicting {years_after} years after training data (model trained on 2000-2013)"
         )
         severity = "HIGH" if years_after > 5 else "MEDIUM"
         
@@ -452,7 +452,7 @@ def check_distribution_shift(
             
             if funding_amount > expected_now * 0.8:
                 warnings_list.append(
-                    f"⚠️ Funding amount (${funding_amount/1e6:.1f}M) is typical for {pred_date.year} "
+                    f" Funding amount (${funding_amount/1e6:.1f}M) is typical for {pred_date.year} "
                     f"but {multiplier_2025.get(stage, 1.5):.1f}x higher than {stage} in 2013 (${expected_2013[stage]/1e6:.1f}M)"
                 )
                 warnings_list.append(
@@ -461,7 +461,7 @@ def check_distribution_shift(
     
     elif pred_date < TRAINING_START:
         warnings_list.append(
-            f"⚠️ Predicting before training data period (model trained on 2000-2013)"
+            f" Predicting before training data period (model trained on 2000-2013)"
         )
         severity = "MEDIUM"
     
@@ -560,7 +560,7 @@ def get_recommendation(success_prob: float) -> str:
 
 def get_user_input() -> Dict:
     """Interactively collect startup information from user."""
-    print("\n📝 Enter startup information:")
+    print("\n Enter startup information:")
     print("-" * 70)
     
     # Funding amount
@@ -569,11 +569,11 @@ def get_user_input() -> Dict:
             funding_str = input("  Funding raised (e.g., 10000000 for $10M): $")
             funding_amount = float(funding_str)
             if funding_amount <= 0:
-                print("     ❌ Funding must be positive")
+                print("      Funding must be positive")
                 continue
             break
         except ValueError:
-            print("     ❌ Please enter a valid number")
+            print("      Please enter a valid number")
     
     # Stage
     print(f"\n  Available stages: {', '.join(STAGES)}")
@@ -581,7 +581,7 @@ def get_user_input() -> Dict:
         stage = input("  Stage: ").strip()
         if stage in STAGES:
             break
-        print(f"     ❌ Please choose from: {', '.join(STAGES)}")
+        print(f"      Please choose from: {', '.join(STAGES)}")
     
     # Sector
     print(f"\n  Common sectors: {', '.join(COMMON_SECTORS)}")
@@ -600,22 +600,22 @@ def get_user_input() -> Dict:
         try:
             investors_count = int(input("  Number of investors: "))
             if investors_count < 0:
-                print("     ❌ Cannot be negative")
+                print("      Cannot be negative")
                 continue
             break
         except ValueError:
-            print("     ❌ Please enter a valid number")
+            print("      Please enter a valid number")
     
     # Founded year
     while True:
         try:
             founded_year = int(input("  Founded year (e.g., 2020): "))
             if founded_year < 1990 or founded_year > 2025:
-                print("     ❌ Please enter a realistic year (1990-2025)")
+                print("      Please enter a realistic year (1990-2025)")
                 continue
             break
         except ValueError:
-            print("     ❌ Please enter a valid year")
+            print("      Please enter a valid year")
     
     # Cutoff date (optional - for temporal validation)
     print(f"\n  ℹ For temporal validation, enter cutoff date (press Enter to use current date)")
@@ -653,7 +653,7 @@ def display_results(
     """Display prediction results in a beautiful format."""
     
     print("\n" + "=" * 70)
-    print("📊 CALCULATED KPIs")
+    print(" CALCULATED KPIs")
     print("=" * 70)
     print(f"  Estimated Revenue:     ${kpis['estimated_revenue']:,.0f}/year")
     print(f"  Capital Efficiency:    {kpis['capital_efficiency']:.2f} ({kpis['capital_efficiency']*100:.0f}%)")
@@ -665,7 +665,7 @@ def display_results(
     print(f"  Investment Score:      {kpis['investment_score']:.0f}/100")
     
     print("\n" + "=" * 70)
-    print("🎯 PREDICTION")
+    print(" PREDICTION")
     print("=" * 70)
     print(f"  Success Probability:   {success_prob*100:.1f}%")
     print(f"  Confidence:            {confidence}")
@@ -680,7 +680,7 @@ def display_results(
     # Distribution shift warnings
     if shift_check['has_shift']:
         print("\n" + "=" * 70)
-        print(f"⚠️ DISTRIBUTION SHIFT WARNING (Severity: {shift_check['severity']})")
+        print(f" DISTRIBUTION SHIFT WARNING (Severity: {shift_check['severity']})")
         print("=" * 70)
         for warning in shift_check['warnings']:
             print(f"  {warning}")
@@ -688,7 +688,7 @@ def display_results(
         print(f"  Prediction date: {shift_check['prediction_date'].date()}")
     
     print("\n" + "=" * 70)
-    print("💡 INTERPRETATION")
+    print(" INTERPRETATION")
     print("=" * 70)
     
     # Contextualization
@@ -708,36 +708,36 @@ def display_results(
     
     # Strengths
     if interpretation['strengths']:
-        print(f"\n  ✅ Key Strengths:")
+        print(f"\n   Key Strengths:")
         for strength in interpretation['strengths']:
             print(f"     • {strength}")
     
     # Concerns
     if interpretation['concerns']:
-        print(f"\n  ⚠️ Areas to Watch:")
+        print(f"\n   Areas to Watch:")
         for concern in interpretation['concerns']:
             print(f"     • {concern}")
     
     print("\n" + "=" * 70)
-    print("⚠️ IMPORTANT DISCLAIMER")
+    print(" IMPORTANT DISCLAIMER")
     print("=" * 70)
     print("""
   This prediction is based on patterns from 2000-2013 historical data
   with temporal validation (93.8% recall on test set).
   
-  ✅ Appropriate use:
+     Appropriate use:
      - Benchmarking against historical successful companies
      - Relative comparison between startups from similar periods
      - Identifying key strengths and concerns
      - Understanding feature importance
   
-  ⚠️ Limitations:
+    Limitations:
      - Market conditions have changed since 2013 (distribution shift)
      - Funding amounts are 2-3× higher now
      - Some metrics are estimated (not actual financials)
      - NOT investment advice - use for informational purposes only
   
-  📌 For production decisions, combine with:
+    For production decisions, combine with:
      - Human due diligence
      - Current market research
      - Actual financial statements
@@ -797,7 +797,7 @@ def predict_startup(
             'cutoff_date': cutoff_date
         }
     
-    print("\n⚙️ Calculating KPIs...")
+    print("\n Calculating KPIs...")
     
     # Calculate KPIs
     kpis = calculate_kpis(
@@ -808,7 +808,7 @@ def predict_startup(
         cutoff_date=inputs.get('cutoff_date')
     )
     
-    print("✅ KPIs calculated")
+    print(" KPIs calculated")
     
     # Check for distribution shift
     shift_check = check_distribution_shift(
@@ -817,7 +817,7 @@ def predict_startup(
         cutoff_date=inputs.get('cutoff_date')
     )
     
-    print("⚙️ Preparing features...")
+    print(" Preparing features...")
     
     # Prepare features for model
     features = prepare_features(
@@ -831,19 +831,19 @@ def predict_startup(
         model=model
     )
     
-    print("✅ Features prepared")
-    print("⚙️ Running prediction...")
+    print(" Features prepared")
+    print(" Running prediction...")
     
     # Predict
     try:
         success_prob, confidence, feature_contributions = predict_success(model, features)
     except Exception as e:
-        print(f"❌ Prediction failed: {e}")
+        print(f" Prediction failed: {e}")
         import traceback
         traceback.print_exc()
         return None
     
-    print("✅ Prediction complete")
+    print(" Prediction complete")
     
     # Interpret
     interpretation = interpret_prediction(
@@ -876,7 +876,7 @@ def predict_startup(
 
 def main():
     """Command-line interface entry point."""
-    print("\n🚀 Welcome to the VENTURE-SCOPE Startup Success Predictor v2.0!")
+    print("\n Welcome to the VENTURE-SCOPE Startup Success Predictor v2.0!")
     print("\nThis tool predicts startup success probability using temporal validation.")
     print("Model trained on 2000-2013 data with 93.8% recall.\n")
     
@@ -887,7 +887,7 @@ def main():
             break
         
         print("\n" + "=" * 70)
-        again = input("\n🔄 Predict another startup? (y/n): ").strip().lower()
+        again = input("\n Predict another startup? (y/n): ").strip().lower()
         if again != 'y':
             break
         print("\n" + "=" * 70 + "\n")

@@ -44,7 +44,7 @@ This document positions VENTURE-SCOPE within the academic literature on venture 
 | Stage progression | Series B > Seed | Series C: 97.2% recall vs Seed: 87.8% | Quantified |
 | Capital efficiency | Not measured | 9.8% importance (rank 3) | Extended |
 
-**Novel contribution**: We quantify their qualitative findings with ML feature importance and add capital efficiency metric (valuation/funding ratio) they don't measure.
+**Novel contribution**: I quantify their qualitative findings with ML feature importance and add capital efficiency metric (valuation/funding ratio) they don't measure.
 
 **Relevance**: Core empirical foundation validating our feature selection strategy.
 
@@ -89,7 +89,7 @@ This document positions VENTURE-SCOPE within the academic literature on venture 
 
 **Their advantage**:
 - Larger dataset (15k vs our 10k after temporal filtering)
-- More algorithm comparison (we focus on Random Forest depth)
+- More algorithm comparison (I focus on Random Forest depth)
 
 **Relevance**: Direct methodological improvement over prior art. We fix their validation flaw and achieve better results with rigorous methodology.
 
@@ -243,7 +243,7 @@ def calculate_investor_score(startup, cutoff_date):
 - Random search: Efficient, explores diverse configs
 - Grid search: Exhaustive, computationally expensive but complete
 
-**Our approach: Grid Search** (contrary to their recommendation)
+**My approach: Grid Search** (contrary to their recommendation)
 
 **Justification**:
 1. **Dataset size**: 10,011 samples (small → training fast, grid search feasible)
@@ -288,21 +288,7 @@ LIME explanation:
 = Net prediction: 0.85
 ```
 
-**My current state**: 
--  Global feature importance (18.2% funding, 13.4% investors, etc.)
--  No per-prediction explanations (LIME/SHAP not implemented)
 
-**Future work**: Implement SHAP (SHapley Additive exPlanations) for deployment version
-- SHAP theoretically grounded (Shapley values from game theory)
-- More stable than LIME for tree-based models
-- Essential for production VC decision support (need to explain each recommendation)
-
-**Why not implemented now**:
-- Academic project focus: Methodology validation, not production deployment
-- Time constraint: SHAP requires 2-3 weeks additional development
-- Low priority: VCs in our survey ranked "explain why" lower than "accurate prediction"
-
-**Relevance**: Shows path to production-ready system. Current work is research prototype, SHAP/LIME needed for real-world deployment.
 
 ---
 
@@ -320,9 +306,6 @@ LIME explanation:
 2. **Prior shift**: P(Y) changes, P(X|Y) constant (e.g., success rate increases over time)
 3. **Concept drift**: P(Y|X) changes (e.g., what predicts success evolves)
 
-**My contribution: Distribution Shift Quantification (2013 → 2025)**
-
-**Novel Analysis**: We explicitly quantify how VC market evolution invalidates historical models.
 
 **Market Evolution Metrics**:
 
@@ -363,9 +346,9 @@ MODEL ERROR: +30 percentage points systematic overestimation
 - Implement temporal adaptation (rolling window, ensemble, regime detection)
 - **Estimated effort**: 6-12 months + access to recent Crunchbase data
 
-**Why this matters**: Most academic papers ignore distribution shift. We explicitly document temporal validity limits and requirements for model refresh.
+**Why this matters**: Most academic papers ignore distribution shift. I explicitly document temporal validity limits and requirements for model refresh.
 
-**Relevance**: Honest limitation documentation. Shows when model breaks and what's needed to fix it. Rare in ML literature (most papers claim generalization without temporal validation).
+
 
 ---
 
@@ -386,27 +369,27 @@ MODEL ERROR: +30 percentage points systematic overestimation
 **1. Temporal Validation Implementation**
 - **Gap**: Krishna et al., most VC ML papers use random splits
 - **Problem**: Look-ahead bias inflates reported accuracy
-- **Our solution**:  Strict temporal split + cutoff-date features + 18 automated tests
+- **My solution**:  Strict temporal split + cutoff-date features + 18 automated tests
 
 **2. Feature Engineering with Cutoff Dates**
 - **Gap**: Papers don't discuss WHEN features are calculated
 - **Problem**: "Investor success rate" - using future or past data?
-- **Our solution**: Explicit cutoff_date parameter in all feature functions
+- **My solution**: Explicit cutoff_date parameter in all feature functions
 
 **3. Distribution Shift Documentation**
 - **Gap**: No paper quantifies when model becomes obsolete
 - **Problem**: VCs deploy 2016 models in 2025 → systematic errors
-- **Our solution**:  2013→2025 shift analysis with concrete miscalibration examples
+- **My solutionr**:  2013→2025 shift analysis with concrete miscalibration examples
 
 **4. Error Analysis by Segment**
 - **Gap**: Papers report aggregate metrics (accuracy, AUC)
 - **Problem**: Miss systematic biases (e.g., early-stage discrimination)
-- **Our solution**: Error rates by stage (12.2% Seed vs 2.8% Series C), funding (<$1M: 36.6% miss), characteristics (False Negatives profile)
+- **My solution**: Error rates by stage (12.2% Seed vs 2.8% Series C), funding (<$1M: 36.6% miss), characteristics (False Negatives profile)
 
 **5. Honest Limitation Acknowledgment**
 - **Gap**: Papers claim generalization without temporal testing
 - **Problem**: Production deployment fails, damages ML credibility
-- **Our solution**: Explicit documentation: "This model works for 2011-2013 cohort, NOT for 2025"
+- **My solution**: Explicit documentation: "This model works for 2011-2013 cohort, NOT for 2025"
 
 ### My Novel Contributions
 
@@ -431,32 +414,32 @@ MODEL ERROR: +30 percentage points systematic overestimation
 - "This model cannot predict 2025 startups without retraining"
 - Requirements for production deployment documented
 
-### Our Limitations (Acknowledged)
+### My Limitations (Acknowledged)
 
 **Limitation 1: Correlation, Not Causation**
 - We measure correlation, Bernstein et al. establish causation
 - Cannot claim "adding investor CAUSES success"
 - Would need: Instrumental variables, RCT, quasi-experimental design
-- **Defense response**: "Our goal is prediction, not causal inference. For investment decisions, combine ML prediction with domain expert judgment."
+
 
 **Limitation 2: Quantitative Features Only**
 - Missing: Founder backgrounds (team quality, experience)
 - Missing: Product-market fit assessments (qualitative)
 - Missing: Competitive dynamics (market timing, sector trends)
 - Only Crunchbase quantitative data available
-- **Defense response**: "Qualitative factors important but hard to scale. Our model provides quantitative baseline, VCs add qualitative assessment during due diligence."
+
 
 **Limitation 3: Temporal Validity Window**
 - Model valid for 2011-2013 test period only
 - 2025 deployment requires retraining (distribution shift)
 - Would need: 2020-2024 Crunchbase data + 6-12 months development
-- **Defense response**: "We explicitly document temporal limitations, rare in ML literature. Honest limitation acknowledgment > false claims of universal validity."
+
 
 **Limitation 4: Binary Classification**
 - Success/Failure only, ignores magnitude of success
 - $50M acquisition = $5B IPO (both "success")
 - Would need: Regression target (exit valuation) or multi-class (acquired/IPO/unicorn/failed)
-- **Defense response**: "Binary classification simplifies problem, aligns with VC screening phase (invest yes/no). Exit valuation prediction harder (more noise), future work."
+
 
 ---
 
@@ -473,7 +456,7 @@ MODEL ERROR: +30 percentage points systematic overestimation
 2. **For VC researchers**: Quantifies qualitative findings with ML feature importance
 3. **For educators**: Complete pipeline showing learning process, not just final model
 
-**Our Advantage over Krishna et al. (2016)**:
+**My Advantage over Krishna et al. (2016)**:
 
 | Dimension | Krishna et al. | VENTURE-SCOPE |
 |-----------|----------------|---------------|
@@ -483,7 +466,7 @@ MODEL ERROR: +30 percentage points systematic overestimation
 | Validation | No tests | 18 automated tests | 
 | Dataset size | 15k | 10k | 
 
-**Our Advantage over Gompers et al. (2020)**:
+**My Advantage over Gompers et al. (2020)**:
 
 | Dimension | Gompers et al. | VENTURE-SCOPE | 
 |-----------|----------------|---------------|
@@ -492,75 +475,34 @@ MODEL ERROR: +30 percentage points systematic overestimation
 | Scalability | Survey 885 VCs (expensive) | ML on Crunchbase (scalable) | 
 | Interpretability | Deep domain expertise | Feature importance only | 
 
-**Complementary Value**: We validate Gompers' survey findings with independent data source (Crunchbase) and different methodology (ML). Triangulation strengthens confidence in results.
+**Complementary Value**: Ie validate Gompers' survey findings with independent data source (Crunchbase) and different methodology (ML). Triangulation strengthens confidence in results.
 
 ---
 
-## Literature Gaps We Do NOT Address
+## Literature Gaps I Do NOT Address
 
 ### Gap 1: Real-time Prediction
 **Challenge**: VCs need predictions BEFORE Series A, using only Seed-stage data.  
-**Why we don't**: 2013 snapshot, all funding rounds visible simultaneously. No sequential prediction.  
+**Why I don't**: 2013 snapshot, all funding rounds visible simultaneously. No sequential prediction.  
 **Who does**: Proprietary VC systems (not published), some hedge funds.  
-**Defense response**: "Real-time prediction requires streaming data infrastructure. Our retrospective analysis demonstrates methodology. Future work: Implement rolling window for production deployment."
+
 
 ### Gap 2: Alternative Data Sources
 **Challenge**: Social media sentiment, Glassdoor reviews, product analytics, news signals.  
-**Why we don't**: Crunchbase only, no integration with external APIs. 2013 data → Twitter API access limited.  
+**Why I don't**: Crunchbase only, no integration with external APIs. 2013 data → Twitter API access limited.  
 **Who does**: CBInsights, PitchBook (proprietary), some hedge funds.  
-**Defense response**: "Alternative data valuable but requires significant data engineering. Our Crunchbase baseline establishes methodology. Future work: Integrate Clearbit, LinkedIn, Twitter APIs."
 
 ### Gap 3: Founder Network Graph Neural Networks
 **Challenge**: Model founder-investor-company relationships as graph, use GNN.  
-**Why we don't**: Crunchbase 2013 has limited relationship data. GNN implementation requires 3-4 months additional work.  
+**Why I don't**: Crunchbase 2013 has limited relationship data. GNN implementation requires 3-4 months additional work.  
 **Who does**: Recent research (2020-2023), Stanford network analysis group.  
-**Defense response**: "GNN promising but complex. Our Random Forest baseline (93.8% recall) establishes strong performance before adding complexity. Future work: GNN extension if additional 5-10% recall gain justifies complexity."
+
 
 ### Gap 4: Market Timing & Economic Cycles
 **Challenge**: Macro factors (interest rates, GDP growth, sector trends) affect startup success.  
-**Why we don't**: Static 2013 snapshot, no time-varying external features.  
+**Why I don't**: Static 2013 snapshot, no time-varying external features.  
 **Who does**: Hedge fund quant models (proprietary), some academic macro-finance papers.  
-**Defense response**: "Macro factors important but outside project scope. Our model identifies startup-specific signals. VCs combine our prediction with macro judgment. Future work: Add macro features (Fed funds rate, sector IPO activity)."
 
----
-
-## Citation Strategy for Technical Report
-
-### Section 1: Abstract & Introduction
-**Cite**:
-- Gompers et al. (2020): VC decision-making context, motivation
-- Krishna et al. (2016): Prior ML accuracy (68%) as baseline comparison
-
-### Section 2: Literature Review
-**Primary citations** (core findings we replicate/extend):
-- Gompers et al. (2020): Funding/investor importance → Our feature importance
-- Krishna et al. (2016): 68% accuracy → Our 93.8% recall (methodological improvement)
-- Ewens & Townsend (2020): Early-stage harder → Our error analysis by stage
-
-**Secondary citations** (contextual support):
-- Bernstein et al. (2017): Investor signaling (causal grounding for our correlational features)
-- Hardt et al. (2016): Temporal validation theory (our implementation)
-- Quionero-Candela et al. (2009): Distribution shift theory (our 2013→2025 analysis)
-
-### Section 3: Methodology
-**Cite**:
-- Hardt et al. (2016): Temporal split justification
-- Bergstra & Bengio (2012): Hyperparameter tuning (grid search justification)
-
-### Section 4: Results
-**Compare to**:
-- Krishna et al. (2016): 68% vs our 93.8% (methodological superiority claim)
-- Gompers et al. (2020): Funding importance confirmation (18.2% feature importance)
-- Ewens & Townsend (2020): Stage-specific error rates confirmation
-
-### Section 5: Discussion - Distribution Shift
-**Cite**:
-- Quionero-Candela et al. (2009): Distribution shift theory
-- Industry reports: Pitchbook, CB Insights, NVCA for 2025 benchmarks
-
-### Section 6: Conclusion - Future Work
-**Cite**:
-- Ribeiro et al. (2016): SHAP/LIME for explainability roadmap
 
 ---
 
@@ -577,34 +519,7 @@ MODEL ERROR: +30 percentage points systematic overestimation
 | Ribeiro et al. | 2016 | KDD | LIME for explainability | Not implemented (future work) | ⏳ Roadmap |
 | Quionero-Candela et al. | 2009 | MIT | Distribution shift in ML | 2013→2025 quantified | 🆕 Extended |
 
-**Legend**:
-- Confirmed: We replicate their finding with independent implementation
--  Exceeded: We improve upon their result
--  Quantified: We measure what they described qualitatively
--  Implemented: We execute their recommendation (they propose, we do)
--  Extended: We add novel analysis building on their theory
--  Limitation: We acknowledge inability to match their rigor (e.g., causation)
--  Roadmap: Planned for future work, not current implementation
 
----
-
-## Defense Strategy: Literature Positioning
-
-**Opening statement** (if asked about novelty):
-
-"VENTURE-SCOPE makes three contributions: First, methodological - we implement temporal validation with cutoff-date features, fixing look-ahead bias in Krishna et al. (2016). This yields 93.8% recall vs their 68% accuracy. Second, comprehensive error analysis - we quantify Ewens & Townsend's (2020) finding that early-stage is harder (12.2% Seed miss vs 2.8% Series C). Third, distribution shift documentation - we explicitly quantify 2013→2025 market evolution (funding 2-3×), rare in ML literature. We don't claim production readiness or causal inference, but demonstrate rigorous methodology with honest limitations."
-
-**If challenged on Krishna et al. comparison**:
-
-"Their 68% accuracy vs our 93.8% recall isn't directly comparable - different metrics. More importantly, their random split creates look-ahead bias, making their 68% likely overestimated. Our contribution is methodological: temporal validation + cutoff features. We replicate on same dataset (Crunchbase 2013) with stricter methodology and achieve better results, validating our approach."
-
-**If asked "Is this original research?"**:
-
-"We position this as methodological validation, not empirical novelty. We replicate prior findings (Gompers: funding matters) with independent data and methodology (ML vs survey). Novel aspects: temporal validation implementation (18 tests), error analysis segmentation, distribution shift quantification. It's a rigorous ML engineering project with academic grounding, not pure theory development."
-
-**If asked about production deployment**:
-
-"Current model unsuitable for production without: (1) Retraining on 2020-2024 data, (2) SHAP explainability, (3) Real-time data pipeline, (4) A/B testing with VCs. We explicitly document these requirements in Section 6 of METHODOLOGY.md. Academic honesty: we demonstrate methodology, not build production system."
 
 ---
 
@@ -638,7 +553,7 @@ Crunchbase News (2024). *Global Unicorn Tracker*. Retrieved from news.crunchbase
 
 ## Academic Honesty Declaration
 
-**What we claim**:
+**What I claim**:
 -  Temporal validation framework implementation (18 tests)
 -  93.8% recall on 2011-2013 test set with rigorous methodology
 -  Replication of prior findings (Gompers, Ewens & Townsend) with ML
@@ -646,14 +561,14 @@ Crunchbase News (2024). *Global Unicorn Tracker*. Retrieved from news.crunchbase
 -  Distribution shift quantification (2013→2025)
 -  Honest limitation documentation
 
-**What we DO NOT claim**:
+**What I DO NOT claim**:
 - Causal inference (we measure correlation only)
 -  Superiority over Bernstein et al. causal RCT
 -  Forward prediction for 2025 startups (distribution shift invalidates model)
 -  Production readiness (SHAP explainability, real-time pipeline needed)
 -  Pure empirical novelty (we replicate + validate prior findings)
 
-**Our value proposition**: Rigorous ML engineering with academic grounding, methodological contribution (temporal validation), and honest documentation of limitations. We demonstrate **how to do ML right** in temporal finance settings, not claim to solve VC prediction perfectly.
+**My value proposition**: Rigorous ML engineering with academic grounding, methodological contribution (temporal validation), and honest documentation of limitations. I demonstrate **how to do ML right** in temporal finance settings, not claim to solve VC prediction perfectly.
 
 ---
 

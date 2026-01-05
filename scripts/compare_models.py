@@ -463,8 +463,8 @@ This report compares two approaches to predicting startup success:
 ### Baseline (Random Split)
 ✓ Shows what the model CAN achieve on mixed temporal data  
 ✓ Useful for initial exploration  
-⚠️ **Contains look-ahead bias** (features include post-outcome funding)  
-⚠️ **Overstates real-world performance** by ~5%
+ **Contains look-ahead bias** (features include post-outcome funding)  
+ **Overstates real-world performance** by ~5%
 
 ### Temporal (Rigorous)
 ✓ **Eliminates look-ahead bias** through strict temporal cutoffs  
@@ -486,18 +486,6 @@ The following charts have been generated:
 ---
 
 
----
-
-## Conclusion
-
-**Key Achievement**: Successfully identified and corrected methodological flaw while maintaining strong predictive performance.
-
-**Grade Impact**: Demonstrates critical thinking, methodological rigor, and honest scientific practice—key criteria for 5.0+/6.0 grade.
-
-**Next Steps**: 
-1. Cross-validation on temporal folds (Week 2)
-2. Hyperparameter tuning (Week 2)
-3. Error analysis by segment (Week 2)
 """
         
         report_path = self.results_dir / 'MODEL_COMPARISON_REPORT.md'

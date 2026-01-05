@@ -56,7 +56,7 @@ else:
 # ==================== FIGURE 1: MODEL COMPARISON ====================
 
 def create_model_comparison():
-    """Bar chart comparing 4 ML models - CRITICAL for defending model choice."""
+    """Bar chart comparing 4 ML models."""
     
     print("\nGenerating Figure 1: Model Comparison...")
     
@@ -111,7 +111,7 @@ def create_model_comparison():
 # ==================== FIGURE 2: MISSING DATA ANALYSIS ====================
 
 def create_missing_data_analysis():
-    """Missing data analysis - CRITICAL for defending 85% data removal."""
+    """Missing data analysis."""
     
     print("\nGenerating Figure 2: Missing Data Analysis...")
     

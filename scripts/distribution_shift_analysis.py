@@ -12,7 +12,6 @@ Key changes analyzed:
 4. Success rates
 5. Feature distributions
 
-Critical for defense: "Why doesn't your 2013 model work for 2025 startups?"
 """
 
 import pandas as pd
@@ -292,7 +291,7 @@ class DistributionShiftAnalyzer:
         
         # Add warning text
         ax.text(0.02, 0.98, 
-               "⚠️ WARNING: Model trained on 2013 data\ncannot predict 2025 outcomes without\nrecalibration to new funding levels",
+               " WARNING: Model trained on 2013 data\ncannot predict 2025 outcomes without\nrecalibration to new funding levels",
                transform=ax.transAxes, fontsize=11,
                verticalalignment='top',
                bbox=dict(boxstyle='round', facecolor='orange', alpha=0.8))
@@ -663,11 +662,6 @@ The VC market has fundamentally changed from 2013 to 2025:
 - **Time horizons: 50-67% longer** (to exit, to IPO)
 - **Syndication: 2× more investors per deal**
 
-**Model's validity:** Strong for 2000-2013 retrospective analysis, **invalid for 2025 forward prediction** without retraining.
-
-**This is expected and properly documented** - it demonstrates understanding of ML model lifecycle and temporal validity constraints.
-
-**Academic contribution:** Clear documentation of distribution shift quantifies the limitation and shows path forward for production deployment.
 
 ---
 

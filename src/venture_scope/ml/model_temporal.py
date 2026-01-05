@@ -240,7 +240,7 @@ class TemporalModelTrainer:
         print(f"  Val-Test gap:   {val_test_gap:+.1f}%")
         
         if train_val_gap > 5:
-            print("  ⚠️ Moderate overfitting detected (>5% gap)")
+            print("   Moderate overfitting detected (>5% gap)")
         else:
             print("  ✓ Acceptable generalization (<5% gap)")
         
