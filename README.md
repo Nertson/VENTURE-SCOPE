@@ -136,12 +136,21 @@ VENTURE-SCOPE/
 git clone https://github.com/apillet/VENTURE-SCOPE.git
 cd VENTURE-SCOPE
 
+# Download data set 
+# download the dataset startups.csv from [https://www.kaggle.com/datasets/mauriciocap/crunchbase2013?select=README.md and place it in the data/raw/ folder before running Pipeline A."
+
 # Install dependencies
 pip install -r requirements.txt --break-system-packages
 
 # Verify installation
 pytest tests/ -v
 ```
+
+### Running the entire project 
+```bash
+python main.py
+```
+
 
 ### Running the Pipeline A
 
@@ -169,13 +178,20 @@ python src/venture_scope/features/scoring.py
 ```
 Output: `data/processed/startups_scored.csv` with 0-100 scores
 
-**Step 4: Generate visualizations**
+**Step 4: Train Baseline Model**
+```bash
+
+python src/venture_scope/ml/model.py
+```
+Trains a Baseline Model (using random K-Fold splitting) to serve as a benchmark for performance comparison.
+
+**Step 5: Generate visualizations**
 ```bash
 python examples/create_visualizations.py
 ```
 Produces 9 figures in `results/figures/`
 
-**Step 5: Missing data analysis**
+**Step 6: Missing data analysis**
 ```bash
 python exemples/missing_data_analysis.py
 ```
@@ -215,20 +231,14 @@ python scripts/distribution_shift_analysis.py
 ```
 Quantifies the data drift between the training era (2013) and modern market conditions.
 
-**Step 6: Train Baseline Model**
-```bash
 
-python src/venture_scope/ml/model.py
-```
-Trains a Baseline Model (using random K-Fold splitting) to serve as a benchmark for performance comparison.
-
-**Step 7: Advanced Model Comparison**
+**Step 6: Advanced Model Comparison**
 ```bash
 python src/venture_scope/ml/model_comparison.py
 ```
 Computes detailed metrics (ROC-AUC, Precision-Recall) for final validation between models.
 
-**Step 8: Run Unit Tests**
+**Step 7: Run Unit Tests**
 ```bash
 python tests/test_temporal_split.py
 ```
